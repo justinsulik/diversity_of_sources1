@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Experiment</title>
+        <script language="javascript" src="libraries/p5.min.js"></script>
+        <script language="javascript" src="libraries/p5.dom.min.js"></script>
+        <script language="javascript" src="libraries/d3.min.js"></script>
+        <script language="javascript" src="libraries/lodash.min.js"></script>
+        <script language="javascript" src="libraries/jquery-3.4.1.min.js"></script>
+        <script language="javascript" src="jspsych/jspsych.js"></script>
+        <script language="javascript" src="jspsych/plugins/jspsych-source-choice.js"></script>
+        <link href="jspsych/css/jspsych.css" rel="stylesheet" type="text/css"></link>
+        <link href="css/experiment.css" rel="stylesheet" type="text/css"></link>
+    </head>
+    <body></body>
+    <script>
+
+    timeline = []
+
+    var trial = {
+      type: "source-choice",
+    };
+    timeline.push(trial);
+
+    jsPsych.init({
+        timeline: timeline
+    })
+
+    </script>
+</html>
