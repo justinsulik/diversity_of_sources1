@@ -43,60 +43,115 @@ jsPsych.plugins['source-choice'] = (function(){
 
     var css = '<style id="jspsych-source-choice-css">'+
     '#mainSketchContainer {border: 1px solid black;}'+
+    '#instructions {position: absolute; left: 540px; margin-top: 50px; width: 360px; text-align: left;}'+
     '</style>';
-    var html = '<div id="mainSketchContainer"></div>';
+    var html = '<div id="mainSketchContainer"><div id="instructions"></div></div>';
 
     display_element.innerHTML = css + html;
-
 
     // an object for tracking the current state of the animation, and what should happen next
     var stateGraph = {
       'scenario': {
         // describe the problem/topic that is being decided
-        next: 'priorsOwn',
+        next: 'priorOwn',
+        instructions: 'The town of Smallville is having an election for major. Bob Smith is running on a platform of blah blah blah.',
         onClick: function(){
-          trialState = 'priorsOwn';
+          trialState = 'priorOwn';
+          updateInstructions();
         }
       },
-      'priorsOwn': {
+      'priorOwn': {
         // give prior rating in response to scenario
-        next: 'priorsOther',
+        next: 'priorAgents',
+        instructions: 'How likely do you think Bob Smith is to win? Rate your belief on the scale below.',
         onClick: function(){
           // check if reponse given: advance or remind
+          if(trial_data.prior){
+            trialState = 'priorAgents';
+            updateInstructions();
+          }
         }
       },
-      'priorsOther': {
+      'priorAgents': {
         // see agents' priors
         next: 'tvCondition',
+        instructions: 'The people of Smallville have their own opinions. Have a look at how likely they think Bob Smith is to win. Click on the person that thinks he has the highest chance.',
         onClick: function(){
-
+          if(trial_data.checks.priorAgents){
+            trialState = 'tvCondition';
+            updateInstructions();
+          }
         }
       },
       'tvCondition': {
         // explain how tvs will work
         next: 'tvOn',
+        instructions: "The people of Smallville get most of their information from TV. Click on each person's TV in order to get them to watch a <b>random</b> news channel. Based on the latest news, they may update their beliefs about Bob Smith's campaign.",
         onClick: function(){
-
+          trialState = 'tvOn';
         }
       },
       'tvOn': {
         // turn tvs on
         next: 'posterior',
         onClick: function(){
+          if(checkDisplays()){
+            trialState = 'posteriorAgents';
+            updateInstructions();
+          } else {
 
+          }
         }
       },
-      'posterior': {
+      'posteriorAgents': {
         // give posterior rating in response to new data
-        next: 'priorsOwn',
+        next: 'priorOwn',
+        instructions: 'Many of them have changed their minds, based on the news. Click on the person who has the highest faith in Bob Smith now.',
         onClick: function(){
-
+          if(trial_data.checks.posteriorAgents){
+            trialState = 'posteriorOwn';
+            updateInstructions();
+          }
+        }
+      },
+      'posteriorOwn': {
+        next: null,
+        instructions: "Have a look at people's updated opinions. What do you think Bob Smith's chances are now?",
+        onClick: function(){
+          if(trial_data.posterior){
+            endTrial();
+          }
         }
       }
-
     };
 
+    var trial_data = {checks: {}};
     var trialState = 'scenario';
+    var displays = [];
+
+    function endTrial() {
+      display_element.innerHTML = ''; // clear everything
+      jsPsych.finishTrial(trial_data);
+    }
+
+    function updateInstructions(){
+        $('#instructions').html(stateGraph[trialState].instructions);
+    }
+    updateInstructions();
+
+    function checkDisplays(){
+      var on = 0;
+       displays.forEach(function(d,i){
+        if(d.on){
+          on+=1;
+        }
+      });
+      if(on==displays.length){
+        return true;
+      } else {
+        return false;
+      }
+    }
 
 /*
  P5.js Pseudo-classes for multiple sketches
@@ -107,10 +162,10 @@ jsPsych.plugins['source-choice'] = (function(){
 
       // declare sketch variables
       var logoCount = 7;
+      var rating;
       var thought;
       var logos = [];
       var tvs = [];
-      var displays = [];
       var thoughts = [];
       var agentCount = 5;
       var agents = [];
@@ -147,6 +202,77 @@ jsPsych.plugins['source-choice'] = (function(){
 
       // sketch functions & pseudo-classes
 
+      function barColor(proportion){
+        var red = (1-proportion)*255;
+        var green = proportion*255;
+        var blue = 0;
+        var alpha = 150;
+        return {red: red, green: green, blue: blue, alpha: alpha};
+      }
+
+      function Rating(){
+        this.x = 480;
+        this.y = 200;
+        this.width = 300;
+        this.yOffset = 20;
+        this.proportion = null;
+        this.xval = null;
+
+        this.show = function(){
+          if(['priorOwn', 'posteriorOwn'].indexOf(trialState) != -1){
+            sketch.push();
+              sketch.translate(this.x, this.y);
+              this.scale();
+              this.bar();
+            sketch.pop();
+          }
+        };
+
+        this.scale = function(){
+          sketch.stroke(0);
+          sketch.strokeWeight(2);
+          sketch.line(0, this.yOffset, this.width, this.yOffset);
+          for(var p = 0; p <= 1; p += 0.1){
+            sketch.line(p*this.width, this.yOffset-4, p*this.width, this.yOffset+4);
+          }
+        };
+
+        this.bar = function(){
+          var color;
+          if(this.over()){
+              this.xval = sketch.mouseX - this.x;
+              this.proportion = this.xval/this.width;
+              color = barColor(this.proportion);
+              sketch.fill(color.red, color.green, color.blue, color.alpha);
+              sketch.rect(0, this.yOffset-4, this.xval, 8);
+            }
+        };
+
+        this.clicked = function(){
+          if(this.over() & ['priorOwn', 'posteriorOwn'].indexOf(trialState) != -1){
+            switch(trialState){
+              case 'priorOwn':
+                trial_data.prior = this.proportion;
+              break;
+              case 'posteriorOwn':
+                trial_data.posterior = this.proportion;
+              break;
+            }
+          }
+        };
+
+        this.over = function(){
+          if(sketch.mouseX >= this.x &
+            sketch.mouseX <= this.x + this.width &
+            sketch.mouseY >= this.y &
+            sketch.mouseY <= this.y+2*this.yOffset){
+              return true;
+          } else {
+            return false;
+          }
+        };
+      }
+
       function Thought(agentNumber, prior, posterior){
         this.x = 70;
         this.y = agentNumber*((sketchHeight-topMargin)/agentCount);
@@ -164,14 +290,14 @@ jsPsych.plugins['source-choice'] = (function(){
         this.barWidth = 0;
 
         this.show = function() {
-          // if(['scenario', 'priorsOwn'].indexOf(trialState) == -1){
+          if(['scenario', 'priorOwn'].indexOf(trialState) == -1){
             sketch.push();
               sketch.translate(this.x, this.y);
               sketch.image(thought, 0, 0, thoughtSize, thoughtSize);
               this.scale();
               this.bar();
             sketch.pop();
-          // }
+          }
         };
 
         this.scale = function() {
@@ -214,7 +340,7 @@ jsPsych.plugins['source-choice'] = (function(){
         this.feet.loadPixels();
 
         this.show = function(){
-          // if(['scenario', 'priorsOwn'].indexOf(trialState) == -1){
+          if(['scenario', 'priorOwn'].indexOf(trialState) == -1){
             sketch.push();
               sketch.translate(this.x, this.y);
               sketch.push();
@@ -240,7 +366,39 @@ jsPsych.plugins['source-choice'] = (function(){
                 // sketch.fill(0);
                 // sketch.ellipse(0.58*agentSize, 0.4*agentSize, 6, 12)
             sketch.pop();
-          // }
+          }
+        };
+
+        this.clicked = function(){
+          if(['priorAgents','posteriorAgents'].indexOf(trialState) != -1 & this.over()){
+            var supporter = _.reduce(thoughts, function(agg,thought,agentNumber){
+              var belief;
+              if(trialState == 'priorAgents'){
+                belief = thought.prior;
+              } else {
+                belief = thought.posterior;
+              }
+              if(belief>agg.max){
+                agg.max = belief;
+                agg.agentNumber = agentNumber;
+              }
+              return agg;
+            }, {max: 0, agentNumber: null});
+            if(this.agentNumber == supporter.agentNumber){
+              trial_data.checks[trialState] = true;
+            }
+          }
+        };
+
+        this.over = function(){
+          if(sketch.mouseX >= this.x &
+             sketch.mouseX <= this.x + agentSize &
+             sketch.mouseY >= this.y &
+             sketch.mouseY <= this.y + agentSize){
+               return true;
+             } else {
+               return false;
+             }
         };
       }
 
@@ -270,7 +428,7 @@ jsPsych.plugins['source-choice'] = (function(){
         };
 
         this.displayTv = function(){
-          // if(['scenario', 'priorsOwn', 'priorsAgent'].indexOf(trialState) == -1){
+          if(['scenario', 'priorOwn', 'priorAgents'].indexOf(trialState) == -1){
             sketch.push();
               sketch.translate(this.x, this.y);
               sketch.scale(0.8);
@@ -285,7 +443,7 @@ jsPsych.plugins['source-choice'] = (function(){
                 }
               sketch.pop();
             sketch.pop();
-          // }
+          }
         };
 
         this.clicked = function(e){
@@ -335,6 +493,7 @@ jsPsych.plugins['source-choice'] = (function(){
       // set up sketch
 
       sketch.setup = function() {
+
         thought.loadPixels();
         logos.forEach(function(d,i){
           logos[i].loadPixels();
@@ -346,6 +505,7 @@ jsPsych.plugins['source-choice'] = (function(){
         });
         sketch.createCanvas(sketchWidth, sketchHeight);
         sketch.frameRate(15);
+        rating = new Rating();
       };
 
       // draw sketch
@@ -353,6 +513,7 @@ jsPsych.plugins['source-choice'] = (function(){
       sketch.draw = function() {
 
         sketch.background(255);
+        rating.show();
         displays.forEach(function(d,i){
           d.displayTv();
         });
@@ -368,6 +529,12 @@ jsPsych.plugins['source-choice'] = (function(){
         displays.forEach(function(display,i){
           display.clicked();
         });
+        agents.forEach(function(agent,i){
+          agent.clicked();
+        });
+        rating.clicked();
+        stateGraph[trialState].onClick();
+        console.log(trialState);
       };
 
     }, 'mainSketchContainer');
