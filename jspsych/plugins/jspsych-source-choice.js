@@ -42,8 +42,8 @@ jsPsych.plugins['source-choice'] = (function(){
     // set up basic html for trial
 
     var css = '<style id="jspsych-source-choice-css">'+
-    '#mainSketchContainer {border: 1px solid black;}'+
-    '#instructions {position: absolute; left: 540px; margin-top: 50px; width: 360px; text-align: left;}'+
+    '#mainSketchContainer {border: 1px solid black; position: relative;}'+
+    '#instructions {position: absolute; margin-top: 50px; left: 500px; width: 360px; text-align: left;}'+
     '</style>';
     var html = '<div id="mainSketchContainer"><div id="instructions"></div></div>';
 
@@ -54,7 +54,7 @@ jsPsych.plugins['source-choice'] = (function(){
       'scenario': {
         // describe the problem/topic that is being decided
         next: 'priorOwn',
-        instructions: 'The town of Smallville is having an election for major. Bob Smith is running on a platform of blah blah blah.',
+        instructions: "The town of Smallville is having an election for mayor. Bob Smith is in the running. His platform involves increasing the town's education budget, building more bicycle paths, and instituting equal pay.",
         onClick: function(){
           trialState = 'priorOwn';
           updateInstructions();
@@ -206,12 +206,12 @@ jsPsych.plugins['source-choice'] = (function(){
         var red = (1-proportion)*255;
         var green = proportion*255;
         var blue = 0;
-        var alpha = 150;
+        var alpha = 180;
         return {red: red, green: green, blue: blue, alpha: alpha};
       }
 
       function Rating(){
-        this.x = 480;
+        this.x = 500;
         this.y = 200;
         this.width = 300;
         this.yOffset = 20;
