@@ -16,7 +16,7 @@ const express = require('express'),
   _ = require('lodash'),
   detect = require('browser-detect'),
   geoip = require('geoip-lite'),
-  db = require(__dirname+'/controllers/db'),
+  // db = require(__dirname+'/controllers/db'),
   tasks = require(__dirname+'/controllers/tasks'),
   responses = require(__dirname+'/controllers/responses'),
   {makeCode} = require('./helper/codeString.js');
@@ -34,7 +34,7 @@ app.use(
 );
 
 // --- MONGOOSE SETUP
-db.connect(process.env.MONGODB_URI);
+// db.connect(process.env.MONGODB_URI);
 
 // --- STATIC MIDDLEWARE
 app.use(express.static(__dirname + '/public'));
