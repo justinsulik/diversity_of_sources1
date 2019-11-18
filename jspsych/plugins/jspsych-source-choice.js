@@ -3,7 +3,7 @@ Description: jsPsych plugin for running a decision-making task that tests people
 Preferably load p5.min.js in the main experiment page (otherwise it will be downloaded from cdnjs.cloudflare.com)
 Need to load jsStat in main expt page
 Todo:
-- will need more logos - and check how logocount is used
+randomise anchors (currently 0-2 male; 3-5 female)
 */
 
 jsPsych.plugins['source-choice'] = (function(){
@@ -34,6 +34,12 @@ jsPsych.plugins['source-choice'] = (function(){
         type: jsPsych.plugins.parameterType.STRING,
         default: 'high',
         description: 'If "high" then all TVs different; if "low" then all the same'
+      },
+      anchor_ids: {
+        type: jsPsych.plugins.parameterType.INT,
+        array: true,
+        default: [0, 1, 2, 3, 4],
+        description: 'Which anchor IDs to use (shuffle in main expt script)'
       },
       social_info_initial: {
         type: jsPsych.plugins.parameterType.FLOAT,
@@ -231,18 +237,40 @@ jsPsych.plugins['source-choice'] = (function(){
     var trialState = 'scenario';
     var estimate;
     var confidence;
-    var displays = [];
-    var thoughts = [];
-    var agents = [];
+    var displays;
+    var thoughts;
+    var agents;
     var hide_agents = ['scenario', 'priorEstimate', 'priorConfidence'];
     var hide_tv = ['scenario', 'priorEstimate', 'priorConfidence', 'priorAgents'];
     var show_bar = ['priorEstimate', 'priorConfidence', 'posteriorEstimate', 'posteriorConfidence'];
 
     // trial functions
 
+    console.log(trial.anchor_ids)
+
+    function displayId(i){
+      // depending on the trial condition (diversity = hi/low)
+      // return a lookup dict to translate anchor # to anchor ID
+      if(trial.diversity == 'low'){
+        if(i==1){
+          // console.log(i, trial.anchor_ids[1])
+          return 1;
+        } else {
+          // console.log(i, trial.anchor_ids[0])
+          return 0;
+        }
+      } else {
+        if(i==3){
+          return 0;
+        } else {
+          return i;
+        }
+      }
+    }
+
     function endTrial() {
-      display_element.innerHTML = ''; // clear everything
       mainSketch.remove();
+      display_element.innerHTML = ''; // clear everything
       jsPsych.finishTrial(trial_data);
     }
 
@@ -293,6 +321,7 @@ jsPsych.plugins['source-choice'] = (function(){
     }
 
     // set up the social data
+
     var social_info = {};
     if(trial.social_info_initial.length>0){
       social_info.initial = trial.social_info_initial;
@@ -334,15 +363,15 @@ jsPsych.plugins['source-choice'] = (function(){
       second = second[0];
       var downward = 0;
       var upward = 0;
-      if(max - second < 0.05){
-        var diff = 0.05 - (max - second);
+      if(max - second < 0.06){
+        var diff = 0.06 - (max - second);
         upward = Math.min(1-max,diff/2);
         downward = diff - upward;
       }
       // incorporate above, and avoid any outright zeros
       var random_array_edited = _.map(random_array, function(d){
         if(d==0){
-          return 0.02;
+          return 0.03;
         } else if(d==second){
           return d - downward;
         } else if(d==max){
@@ -401,15 +430,20 @@ jsPsych.plugins['source-choice'] = (function(){
   function createSketch(){
     mainSketch = new p5(function( sketch ) {
 
-
+      // set global vars
+      displays = [];
+      thoughts = [];
+      agents = [];
 
       // declare sketch variables
-      var logoCount = 7;
       var thought;
-      var logos = [];
       var tvs = [];
+      var backgrounds = [];
+      var anchors = [];
+      var jaws = [];
       var remotesImg = [];
       var remotes = [];
+
       var agentCount = trial.agents;
       var agentParts = {m: {hair: []}, f: {hair: {}}};
       var sketchWidth = 900;
@@ -418,14 +452,9 @@ jsPsych.plugins['source-choice'] = (function(){
       var thoughtSize = 100;
       var topMargin = 50;
       var passes = 4;
-      var displaySizes = {
-        0: {x: 150, y: 100},
-        1: {x: 150, y: 92},
-        2: {x: 150, y: 81},
-        3: {x: 150, y: 93},
-        4: {x: 150, y: 87}
-      };
-      var tvSize = {x: 160, y: 130};
+      var displaySize = {x: 141, y: 88};
+      var displayOffset = {x: 10, y: 31};
+      var tvSize = {x: 160, y: 160};
       var bodyColors = [{r: 255, g: 30, b: 30}, {r: 51, g: 158, b: 51}, {r: 227, g: 80, b: 234},
           {r: 247, g: 147, b: 35}, {r: 9, g: 202, b: 237}];
       var hairColors = [{r: 236, g: 236, b: 25}, {r: 160, g: 68, b: 11}, {r: 167, g: 113, b: 13},
@@ -739,38 +768,72 @@ jsPsych.plugins['source-choice'] = (function(){
         };
       }
 
-      function Display(agentNumber, logoNumber){
-        this.logoNumber = logoNumber;
+      function Display(agentNumber, channel){
         this.agentNumber = agentNumber;
         this.passes = passes;
         this.tv = tvs[agentNumber];
-        this.displaySize = displaySizes[agentNumber];
-        this.logo = logos[logoNumber];
+        this.channel = channel;
         this.on = false;
         this.stable = false;
         this.y = agentNumber*((sketchHeight-topMargin)/agentCount) + topMargin;
         this.x = 290;
-        this.displayIndex = (logoNumber+1)%logoCount;
+        this.jawOffset = 0;
 
-        this.spinLogos = function(){
-          sketch.image(logos[this.displayIndex],0,0,this.displaySize.x,this.displaySize.y);
-          if(this.passes <= 0){
-            this.displayIndex = this.logoNumber;
+        // for random channels, set up a random sequence of displays
+        if(trial.choice_type == 'random'){
+          var displaySequence = [];
+          for(var i = 0; i<passes; i++){
+            trial.anchor_ids.forEach(function(d,i){
+              displaySequence.push(i);
+            });
+          }
+          this.displaySequence = _.shuffle(displaySequence);
+          this.displayIndex = this.displaySequence.length;
+          this.channelIndex = this.displaySequence[this.displayIndex]
+        }
+
+        this.blankScreen = function(){
+          sketch.push();
+            sketch.translate(displayOffset.x, displayOffset.y);
+            sketch.rect(0, 0, displaySize.x, displaySize.y);
+          sketch.pop();
+        };
+
+        this.jawMove = function(){
+          if(this.jawOffset == 0){
+            this.jawOffset = 1;
+          } else {
+            this.jawOffset = 0;
+          }
+        };
+
+        this.spinChannels = function(){
+          if(this.displayIndex <= 0){
+            this.channelIndex = this.channel;
             this.stable = true;
+            if(trialState == 'tvStart' | trialState == 'tvsOn' | trialState == 'posteriorAgents'){
+              this.jawMove();
+            }
             if(trialState=='tvStart'){
               checkDisplays();
             }
           } else {
-            if (this.displayIndex == this.logoNumber){
-              this.passes -= 1;
-            }
-            this.displayIndex = (this.displayIndex+1)%logoCount;
+            this.displayIndex -= 1;
+            this.channelIndex = this.displaySequence[this.displayIndex];
           }
+          sketch.image(backgrounds[this.channelIndex], 0, 0, tvSize.x, tvSize.y);
+          sketch.image(anchors[this.channelIndex], 0, 0, tvSize.x, tvSize.y);
+          sketch.image(jaws[this.channelIndex], 0, this.jawOffset, tvSize.x, tvSize.y);
         };
 
         this.showLogo = function(){
-          sketch.image(logos[this.logoNumber],0,0,this.displaySize.x,this.displaySize.y);
+          sketch.image(backgrounds[this.channel], 0, 0, tvSize.x, tvSize.y);
+          sketch.image(anchors[this.channel], 0, 0, tvSize.x, tvSize.y);
+          sketch.image(jaws[this.channel], 0, this.jawOffset, tvSize.x, tvSize.y);
           this.stable = true;
+          if(trialState == 'tvStart' | trialState == 'tvsOn' | trialState == 'posteriorAgents'){
+            this.jawMove();
+          }
           if(trialState=='tvStart'){
             checkDisplays();
           }
@@ -784,16 +847,16 @@ jsPsych.plugins['source-choice'] = (function(){
 
               sketch.image(this.tv, 0, 0, tvSize.x, tvSize.y);
               sketch.push();
-                sketch.translate(5, 5);
                 if(this.on){
                   sketch.fill(255);
                 } else {
                   sketch.fill(40);
                 }
-                sketch.rect(0, 0, this.displaySize.x, this.displaySize.y);
+                // blank screen
+                this.blankScreen();
                 if(this.on){
                   if(trial.choice_type=='random'){
-                    this.spinLogos();
+                    this.spinChannels();
                   } else {
                     this.showLogo();
                   }
@@ -806,9 +869,9 @@ jsPsych.plugins['source-choice'] = (function(){
         this.clicked = function(e){
           if(trialState == 'tvStart' & trial.choice_type=='random'){
             if(sketch.mouseX >= this.x &
-               sketch.mouseX <= this.x + this.displaySize.x &
+               sketch.mouseX <= this.x + displaySize.x &
                sketch.mouseY >= this.y &
-               sketch.mouseY <= this.y + this.displaySize.y){
+               sketch.mouseY <= this.y + displaySize.y){
                this.on = true;
             }
           }
@@ -845,6 +908,7 @@ jsPsych.plugins['source-choice'] = (function(){
                sketch.mouseY <= this.y + 35){
                  this.on = true;
                  displays[this.index].on = true;
+                 console.log(displays[this.index])
                }
           }
         };
@@ -871,22 +935,24 @@ jsPsych.plugins['source-choice'] = (function(){
         agentParts.m.feet = sketch.loadImage('img/agents/feet.png');
         agentParts.m.legs = sketch.loadImage('img/agents/m_legs.png');
 
-        for(var i = 0; i<logoCount; i++){
-          logos[i] = sketch.loadImage('img/logos/'+i+'.png');
-        }
-
         var factors = {gender: ['m', 'f'], hair: [0, 1, 2]};
         var ids = jsPsych.randomization.factorial(factors, 1);
 
         for(var j = 0; j<agentCount; j++){
-          tvs[j] = sketch.loadImage('img/tvs/'+j+'.png');
+          tvs[j] = sketch.loadImage('img/tv/tv_'+j+'.png');
           if(trial.choice_type=='intentional'){
             remotesImg[j] = sketch.loadImage('img/remotes/'+j+'.png');
           }
           var gender = ids[j].gender;
           var hair = ids[j].hair;
+          console.log(j)
           agents[j] = new Agent(gender, hair, j);
         }
+        trial.anchor_ids.forEach(function(d,i){
+          backgrounds[i] = sketch.loadImage('img/tv/channel_'+d+'.png');
+          anchors[i] = sketch.loadImage('img/tv/anchor_'+d+'_body.png');
+          jaws[i] = sketch.loadImage('img/tv/anchor_'+d+'_jaw.png');
+        });
       };
 
       // set up sketch
@@ -894,16 +960,16 @@ jsPsych.plugins['source-choice'] = (function(){
       sketch.setup = function() {
 
         thought.loadPixels();
-        logos.forEach(function(d,i){
-          logos[i].loadPixels();
+        backgrounds.forEach(function(d,i){
+          backgrounds[i].loadPixels();
+          anchors[i].loadPixels();
+          jaws[i].loadPixels();
         });
         agents.forEach(function(d,i){
           tvs[i].loadPixels();
-          if(trial.diversity == 'high'){
-            displays[i] = new Display(i, i);
-          } else {
-            displays[i] = new Display(i, trial.agents+1);
-          }
+          var k = displayId(i);
+          console.log(i,k)
+          displays[i] = new Display(i, k);
           thoughts[i] = new Thought(i, Math.random(), Math.random());
           if(trial.choice_type=='intentional'){
             remotesImg[i].loadPixels();
@@ -960,7 +1026,6 @@ jsPsych.plugins['source-choice'] = (function(){
       };
 
     }, 'mainSketchContainer');
-
 
     $('body').on('click', function(e){
       if(['scenario', 'tvsOn'].indexOf(trialState) != -1 & e.target.id=='next'){
