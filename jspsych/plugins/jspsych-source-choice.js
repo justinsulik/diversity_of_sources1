@@ -66,11 +66,43 @@ jsPsych.plugins['source-choice'] = (function(){
         pretty_name: 'Change type',
         default: 'percent_remaining',
         description: 'If "percent_remaining", then change proportional to gap between estimate and 0/100% (depending on sign of parameter "change").'
+      },
+      town: {
+        type: jsPsych.plugins.parameterType.STRING,
+        default: "Smallville"
+      },
+      candidate: {
+        type: jsPsych.plugins.parameterType.STRING,
+        default: 'Bob Smith'
+      },
+      platform: {
+        type: jsPsych.plugins.parameterType.STRING,
+        default: "His platform involves increasing the town's education budget, building more bicycle paths, and instituting equal pay."
+      },
+      nominative: {
+        type: jsPsych.plugins.parameterType.STRING,
+        default: "he",
+        description: "What pronoun to use for the mayoral candidate"
       }
     }
   };
 
   plugin.trial = function(display_element, trial){
+
+    // set up basic html for trial
+
+    var css = '<style id="jspsych-source-choice-css">'+
+    '#mainSketchContainer {border: 1px solid black; position: relative;}'+
+    '.instructions {position: absolute; left: 500px; width: 360px; text-align: left; font-size: 15px}'+
+    '#instructions {margin-top: 30px;}'+
+    '#instructions2 {margin-top: 260px;}'+
+    '.hidden {color: grey;}'+
+    '</style>';
+    var html = '<div id="mainSketchContainer"><div id="instructions" class="instructions"></div>'+
+    '<div id="instructions2" class="instructions"></div></div>';
+    var button = '<br><button id="next">Next</button>';
+
+    display_element.innerHTML = css + html;
 
     // check if p5 script is loaded
     if (window.p5){
@@ -87,28 +119,13 @@ jsPsych.plugins['source-choice'] = (function(){
       });
     }
 
-    // set up basic html for trial
-
-    var css = '<style id="jspsych-source-choice-css">'+
-    '#mainSketchContainer {border: 1px solid black; position: relative;}'+
-    '.instructions {position: absolute; left: 500px; width: 360px; text-align: left; font-size: 15px}'+
-    '#instructions {margin-top: 30px;}'+
-    '#instructions2 {margin-top: 260px;}'+
-    '.hidden {color: grey;}'+
-    // '#next {margin-left: 20px}'+
-    '</style>';
-    var html = '<div id="mainSketchContainer"><div id="instructions" class="instructions"></div><div id="instructions2" class="instructions"></div></div>';
-    var button = '<br><button id="next">Next</button>';
-
-    display_element.innerHTML = css + html;
-
     // an object for tracking the current state of the animation, and what should happen next
 
     var stateGraph = {
       'scenario': {
         // describe the problem/topic that is being decided
         instructions: function(){
-          return "The town of Smallville is having an election for mayor. Bob Smith is in the running. His platform involves increasing the town's education budget, building more bicycle paths, and instituting equal pay."+
+          return "The town of "+trial.town+" is having an election for mayor. " + trial.candidate + " is in the running. "+trial.platform+
           button;
         },
         onClick: function(){
@@ -119,7 +136,7 @@ jsPsych.plugins['source-choice'] = (function(){
       'priorEstimate': {
         // give prior rating in response to scenario
         instructions: function(){
-          return 'How likely do you think Bob Smith is to win? Rate your belief on the scale below (click scale to confirm).';
+          return 'How likely do you think '+trial.candidate+' is to win? Rate your belief on the scale below (click scale to confirm).';
         },
         onClick: function(){
           // check if reponse given: advance or remind
@@ -155,7 +172,7 @@ jsPsych.plugins['source-choice'] = (function(){
       'priorAgents': {
         // see agents' priors
         instructions: function(){
-          return 'The people of Smallville have their own opinions. Have a look at how likely they think Bob Smith is to win. Click on the person that thinks he has the highest chance.';
+          return 'The people of '+trial.town+' have their own opinions. Have a look at how likely they think '+trial.candidate+' is to win. Click on the person that thinks '+trial.nominative+' has the highest chance.';
         },
         onClick: function(){
           if(trial_data.checks.priorAgents){
@@ -168,9 +185,9 @@ jsPsych.plugins['source-choice'] = (function(){
         // explain how tvs will work
         instructions: function(){
           if(trial.choice_type=='random'){
-            return "The people of Smallville get most of their information from TV. Click on each person's TV, which will select a <b>random</b> news channel for them to watch.";
+            return "The people of "+trial.town+" get most of their information from TV. Click on each person's TV, which will select a <b>random</b> news channel for them to watch.";
           } else {
-            return "The people of Smallville get most of their information from TV. Click on each person's remote control, and they will turn on a trusted news station.";
+            return "The people of "+trial.town+" get most of their information from TV. Click on each person's remote control, and they will turn on a trusted news station.";
           }
         },
         onClick: function(){
@@ -180,7 +197,7 @@ jsPsych.plugins['source-choice'] = (function(){
       'tvsOn': {
         // give posterior rating in response to new data
         instructions: function(){
-          return "Based on the news, some of them have changed their minds about Bob Smith's campaign. Click 'next' to see how they've changed their minds."+
+          return "Based on the news, some of them have changed their minds about "+trial.candidate+"'s campaign. Click 'next' to see how they've changed their minds."+
           button;
         } ,
         onClick: function(){
@@ -199,7 +216,7 @@ jsPsych.plugins['source-choice'] = (function(){
       'posteriorCheck': {
         // give posterior rating in response to new data
         instructions: function(){
-          return "Click on the person that thinks he has the highest chance.";
+          return "Click on the person that thinks "+trial.nominative+" has the highest chance.";
         },
         onClick: function(){
           if(trial_data.checks.posteriorCheck){
@@ -210,7 +227,7 @@ jsPsych.plugins['source-choice'] = (function(){
       },
       'posteriorEstimate': {
         instructions: function(){
-          return "Have a look at people's updated opinions. What do you think Bob Smith's chances are now?  Rate your confidence on the scale below (click scale to confirm).";
+          return "Have a look at people's updated opinions. What do you think "+trial.candidate+"'s chances are now?  Rate your confidence on the scale below (click scale to confirm).";
         },
         onClick: function(){
           if(trial_data.posterior_estimate){
@@ -246,17 +263,13 @@ jsPsych.plugins['source-choice'] = (function(){
 
     // trial functions
 
-    console.log(trial.anchor_ids)
-
     function displayId(i){
       // depending on the trial condition (diversity = hi/low)
       // return a lookup dict to translate anchor # to anchor ID
       if(trial.diversity == 'low'){
         if(i==1){
-          // console.log(i, trial.anchor_ids[1])
           return 1;
         } else {
-          // console.log(i, trial.anchor_ids[0])
           return 0;
         }
       } else {
@@ -402,10 +415,8 @@ jsPsych.plugins['source-choice'] = (function(){
         case 'percent_remaining':
           updated_vals = _.map(social_info.initial, function(d,i){
             if(change > 0){
-              console.log(d, 1-d, change, (1-d)*change, d+(1-d)*change);
               return d+(1-d)*change;
             } else {
-              console.log(d, d+d*change);
               return d + d*change;
             }
           });
@@ -727,8 +738,6 @@ jsPsych.plugins['source-choice'] = (function(){
                 sketch.tint(feetColors[this.agentNumber].r, feetColors[this.agentNumber].g, feetColors[this.agentNumber].b);
                 sketch.image(this.feet, 0, 0, agentSize, agentSize);
               sketch.pop();
-                // sketch.fill(0);
-                // sketch.ellipse(0.58*agentSize, 0.4*agentSize, 6, 12)
             sketch.pop();
           }
         };
@@ -789,7 +798,7 @@ jsPsych.plugins['source-choice'] = (function(){
           }
           this.displaySequence = _.shuffle(displaySequence);
           this.displayIndex = this.displaySequence.length;
-          this.channelIndex = this.displaySequence[this.displayIndex]
+          this.channelIndex = this.displaySequence[this.displayIndex];
         }
 
         this.blankScreen = function(){
@@ -908,7 +917,6 @@ jsPsych.plugins['source-choice'] = (function(){
                sketch.mouseY <= this.y + 35){
                  this.on = true;
                  displays[this.index].on = true;
-                 console.log(displays[this.index])
                }
           }
         };
@@ -945,7 +953,6 @@ jsPsych.plugins['source-choice'] = (function(){
           }
           var gender = ids[j].gender;
           var hair = ids[j].hair;
-          console.log(j)
           agents[j] = new Agent(gender, hair, j);
         }
         trial.anchor_ids.forEach(function(d,i){
@@ -968,7 +975,6 @@ jsPsych.plugins['source-choice'] = (function(){
         agents.forEach(function(d,i){
           tvs[i].loadPixels();
           var k = displayId(i);
-          console.log(i,k)
           displays[i] = new Display(i, k);
           thoughts[i] = new Thought(i, Math.random(), Math.random());
           if(trial.choice_type=='intentional'){

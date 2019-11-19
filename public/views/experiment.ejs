@@ -10,6 +10,7 @@
         <script language="javascript" src="libraries/jstat.min.js"></script>
         <script language="javascript" src="jspsych/jspsych.js"></script>
         <script language="javascript" src="jspsych/plugins/jspsych-source-choice.js"></script>
+        <script language="javascript" src="jspsych/plugins/jspsych-beast.js"></script>
         <link href="jspsych/css/jspsych.css" rel="stylesheet" type="text/css"></link>
         <link href="css/experiment.css" rel="stylesheet" type="text/css"></link>
     </head>
@@ -18,15 +19,24 @@
 
     timeline = []
 
+    // towns: riverside, burchester,
+
     // randomise anchor ids
     var anchorOrder = jsPsych.randomization.shuffle(_.range(7));
+
+    //
+    var beast = {
+      type: 'beast',
+      animals: ['bear', 'dolphin', 'elephant', 'rabbit', 'kangaroo'],
+    }
 
     var trial_low = {
       type: "source-choice",
       // choice_type: 'intentional',
       choice_type: 'random',
       anchor_ids: anchorOrder.slice(0,7),
-      diversity: 'low'
+      // diversity: 'low',
+      diversity: 'high'
     };
 
     var trial_high = {
@@ -34,11 +44,16 @@
       // choice_type: 'intentional',
       choice_type: 'random',
       anchor_ids: anchorOrder.slice(2,7),
-      diversity: 'high'
+      diversity: 'high',
+      candidate: 'Jane Doe',
+      platform: "Her platform involves reducing property taxes, hiring more police officers, and fighting corruption.",
+      town: 'Springfield',
+      nominative: 'she'
     };
 
+    // timeline.push(beast);
     timeline.push(trial_low);
-    // timeline.push(trial_high);
+    timeline.push(trial_high);
 
     jsPsych.init({
         timeline: timeline
