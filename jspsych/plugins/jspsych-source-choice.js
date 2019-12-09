@@ -632,31 +632,27 @@ jsPsych.plugins['source-choice'] = (function(){
       function Thought(agentNumber){
         this.x = 70;
         this.y = agentNumber*((sketchHeight-topMargin)/agentCount);
-        var start = {x: 10, y: 45};
-        var end = {x: 90, y: 45};
-        this.distance = end.x - start.x;
+        // var start = {x: , y: 45};
+        // var end = {x: 90, y: 45};
+        // this.distance = end.x - start.x;
+        this.distance = thoughtSize;
 
         this.show = function() {
           if(['socialInfo', 'posteriorCheck', 'posteriorEstimate', 'posteriorConfidence'].indexOf(trialState) != -1){
             sketch.push();
               sketch.translate(this.x, this.y);
-              sketch.image(thought, 0, 0, thoughtSize, thoughtSize);
-              this.scale();
               this.bar();
+              sketch.image(thought, 0, 0, thoughtSize, thoughtSize);
             sketch.pop();
           }
         };
 
-        this.scale = function() {
-          sketch.line(start.x, start.y, end.x, end.y);
-          for(var p = 0; p <= 1; p += 0.1){
-            sketch.line(start.x + p*this.distance, start.y - 3, start.x + p*this.distance, start.y + 3);
-          }
-        };
-
         this.bar = function(){
-              sketch.fill(this.red, this.green, 0, 180);
-              sketch.rect(start.x, start.y-2, this.barWidth, 4);
+              sketch.strokeWeight(0);
+              sketch.fill(255, 255, 0);
+              sketch.rect(0, 0, this.barWidth, thoughtSize);
+              sketch.fill(0, 0, 255);
+              sketch.rect(this.barWidth, 0, thoughtSize-this.barWidth, thoughtSize);
         };
       }
 
