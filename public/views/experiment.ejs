@@ -36,7 +36,8 @@
       choice_type: 'random',
       anchor_ids: anchorOrder.slice(0,7),
       // diversity: 'low',
-      diversity: 'high'
+      diversity: 'high',
+      // agreement: 'agree'
     };
 
     var trial_high = {
@@ -53,7 +54,7 @@
 
     // timeline.push(beast);
     timeline.push(trial_low);
-    timeline.push(trial_high);
+    // timeline.push(trial_high);
 
     jsPsych.init({
         timeline: timeline
