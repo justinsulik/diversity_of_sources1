@@ -121,6 +121,7 @@ jsPsych.plugins['source-choice'] = (function(){
           // check if reponse given: advance or remind
           if(trial_data.prior_estimate){
             social_info = generateInfo();
+            console.log(social_info);
             // update agents to reflect social_info
             updateAgentsBeliefs();
             trialState = 'priorConfidence';
@@ -159,7 +160,7 @@ jsPsych.plugins['source-choice'] = (function(){
       'tvsOn': {
         // give posterior rating in response to new data
         instructions: function(){
-          return "Based on the news, the people of "+trial.town+" have each decided how likely they think "+trial.candidate+" will be. Click 'next' to see their beliefs."+
+          return "Based on the news, the people of "+trial.town+" have each decided how likely they think "+trial.candidate+" is to win. Click 'next' to see their beliefs about his chances."+
           button;
         },
         onClick: function(){
@@ -322,10 +323,10 @@ jsPsych.plugins['source-choice'] = (function(){
           break;
       }
       // avoid a narrow range around extreme estimates, by moving estimates towards the middle of the range;
-      if(mu < 0.2){
-        mu = 0.2;
-      } else if (mu > 0.8){
-        mu = 0.8;
+      if(mu < 0.1){
+        mu = 0.1;
+      } else if (mu > 0.9){
+        mu = 0.1;
       }
       return mu;
     }
@@ -389,9 +390,9 @@ jsPsych.plugins['source-choice'] = (function(){
         upward = Math.min(1-max,diff/2);
         downward = diff - upward;
       }
-      // incorporate above, and avoid any outright zeros
+      // incorporate above, and avoid any outright zeros (otherwise there will be no bar to display)
       var array_edited = _.map(array, function(d){
-        if(d==0){
+        if(d<0.04){
           return 0.04;
         } else if(d==second){
           return d - downward;
@@ -533,7 +534,7 @@ jsPsych.plugins['source-choice'] = (function(){
           sketch.strokeWeight(2);
           sketch.line(0, this.yOffset, this.width, this.yOffset);
           for(var p = 0; p <= 1; p += 0.1){
-            sketch.line(p*this.width, this.yOffset-4, p*this.width, this.yOffset+4);
+            sketch.line(p*this.width, this.yOffset-6, p*this.width, this.yOffset+4);
           }
         };
 
@@ -555,7 +556,7 @@ jsPsych.plugins['source-choice'] = (function(){
                 color = barColor(this.proportion);
                 sketch.fill(color.red, color.green, color.blue, color.alpha);
               }
-              sketch.rect(0, this.yOffset-4, this.xval, 8);
+              sketch.rect(0, this.yOffset-5, this.xval, 10);
             }
         };
 
@@ -634,6 +635,8 @@ jsPsych.plugins['source-choice'] = (function(){
         this.y = agentNumber*((sketchHeight-topMargin)/agentCount);
         var start = {x: 10, y: 45};
         var end = {x: 90, y: 45};
+        var scaleHeight = 10;
+        var barHeight = 19;
         this.distance = end.x - start.x;
 
         this.show = function() {
@@ -650,13 +653,13 @@ jsPsych.plugins['source-choice'] = (function(){
         this.scale = function() {
           sketch.line(start.x, start.y, end.x, end.y);
           for(var p = 0; p <= 1; p += 0.1){
-            sketch.line(start.x + p*this.distance, start.y - 3, start.x + p*this.distance, start.y + 3);
+            sketch.line(start.x + p*this.distance, start.y - scaleHeight, start.x + p*this.distance, start.y + scaleHeight);
           }
         };
 
         this.bar = function(){
-              sketch.fill(this.red, this.green, 0, 180);
-              sketch.rect(start.x, start.y-2, this.barWidth, 4);
+              sketch.fill(this.red, this.green, 0, 220);
+              sketch.rect(start.x, start.y-barHeight/2, this.barWidth, barHeight);
         };
       }
 
