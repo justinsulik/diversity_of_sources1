@@ -163,18 +163,6 @@ jsPsych.plugins['source-choice'] = (function(){
           return "Based on the news, the people of "+trial.town+" have each decided how likely they think "+trial.candidate+" is to win. Click 'next' to see their beliefs about his chances."+
           button;
         },
-        onClick: function(){
-            trialState = 'socialInfo';
-            updateInstructions();
-        }
-      },
-      'socialInfo': {
-        // give social info
-        instructions: function(){
-          return "";
-        },
-        onClick: function(){
-        }
       },
       'posteriorCheck': {
         // give posterior rating in response to new data
@@ -251,18 +239,6 @@ jsPsych.plugins['source-choice'] = (function(){
       jsPsych.finishTrial(trial_data);
     }
 
-    function allPosteriorsUpdated(){
-      var updated = 0;
-      thoughts.forEach(function(d,i){
-        if(d.updated){
-          updated += 1;
-        }
-      });
-      if(updated == thoughts.length & trialState == 'socialInfo'){
-        trialState = 'posteriorCheck';
-        updateInstructions();
-      }
-    }
 
     function checkDisplays(){
       var on = 0;
@@ -298,83 +274,61 @@ jsPsych.plugins['source-choice'] = (function(){
       }
     }
 
+    function classifyPrior(prior){
+      var bin;
+      if(prior <= 0.25){
+        bin = 'lowest';
+      } else if (prior < 0.5){
+        bin = 'lower';
+      } else if (prior < 0.75) {
+        bin = 'higher';
+      } else {
+        bin = 'highest';
+      }
+      return bin;
+    }
+
     // set up the social data
 
-    function pickMu(){
-      // generate a mu parameter for the beta distribution;
-      var mu;
-      var prior = trial_data.prior_estimate;
-      switch(trial.agreement){
-        case 'agree':
-          mu = prior;
-          break;
-        case 'disagree':
-          if(prior == 0.5){
-            // pick a random extreme
-            mu = Math.floor(Math.random()*2);
-          } else if (prior > 0.5){
-            mu = prior - 0.4;
+    function pickRange(){
+      // generate the range that social info will be drawn from
+      var range;
+      var prior_binned = classifyPrior(trial_data.prior_estimate);
+      switch(prior_binned){
+        case 'lowest':
+          if(trial.agreement=='agree'){
+            range = [0, 0.35];
           } else {
-            mu = prior + 0.4;
+            range = [0.45, 0.8];
           }
           break;
-        case 'neutral':
-          mu = 0.5;
+        case 'lower':
+          if(trial.agreement=='agree'){
+            range = [0.2, 0.55];
+          } else {
+            range = [0.65, 1];
+          }
+          break;
+        case 'higher':
+          if(trial.agreement=='agree'){
+            range = [0.45, 0.8];
+          } else {
+            range = [0, 0.35];
+          }
+          break;
+        case 'highest':
+          if(trial.agreement=='agree'){
+            range = [0.65, 1];
+          } else {
+            range = [0.2, 0.55];
+          }
           break;
       }
-      // avoid a narrow range around extreme estimates, by moving estimates towards the middle of the range;
-      if(mu < 0.1){
-        mu = 0.1;
-      } else if (mu > 0.9){
-        mu = 0.1;
-      }
-      return mu;
-    }
-
-    function randomBeta(mu){
-      // generate random beta distribution
-      var total = 4;
-      var alpha = mu*total;
-      var beta = total - alpha;
-      var random_array = [];
-      for(var i = 0; i < trial.agents; i++){
-        var random_val = jStat.beta.sample(alpha, beta);
-        random_array.push(random_val);
-      }
-      return random_array;
-    }
-
-    function shiftArray(random_array, mu){
-      // set mean of random social opinion as close to mu as possible
-      var info_mean = _.mean(random_array);
-      var diff = mu - info_mean;
-      var shifted = weightAdjustments(random_array, diff);
-      return shifted;
-    }
-
-    function weightAdjustments(array, distance){
-        // Distribute the adjustment proportionally (so that the values furthest from the extreme have the most to move)
-        // calculate distance to boundary
-        var distances;
-        if(distance>0){
-          distances = _.map(array, function(d){
-            return _.max([1 - d, 0]);
-          });
-        } else {
-          distances = _.map(array, function(d){
-            return _.min([d, 1]);
-          });
-        }
-        // normalise distances
-        var total = _.sum(distances);
-        var adjusted = _.map(array, function(d, i){
-          return d + array.length*distance*distances[i]/total;
-        });
-        return adjusted;
+      return range;
     }
 
     function splitLeaders(array){
-      // avoid too close of an overlap between 1st and 2nd highest vals
+      // avoid too close of an overlap between 1st and 2nd highest vals, which are asked about as an attention check
       var max = _.max(array);
       var second = _.reduce(array, function(acc, val){
         if(val > acc[0] & val < acc[1]){
@@ -405,11 +359,20 @@ jsPsych.plugins['source-choice'] = (function(){
       return array_edited;
     }
 
+    function randomUniform(range, n=5) {
+      var min = range[0];
+      var max = range[1];
+      var random = [];
+      for(var i = 0; i < n; i++){
+        random.push(Math.random() * (max - min) + min);
+      }
+      return random;
+    }
+
     function generateInfo(){
-      var mu = pickMu();
-      var random_array = randomBeta(mu);
-      var centered_array = shiftArray(random_array, mu);
-      var final_array = splitLeaders(centered_array);
+      var range = pickRange();
+      var random_array = randomUniform(range);
+      var final_array = splitLeaders(random_array);
       return final_array;
     }
 
@@ -640,7 +603,7 @@ jsPsych.plugins['source-choice'] = (function(){
         this.distance = end.x - start.x;
 
         this.show = function() {
-          if(['socialInfo', 'posteriorCheck', 'posteriorEstimate', 'posteriorConfidence'].indexOf(trialState) != -1){
+          if(['posteriorCheck', 'posteriorEstimate', 'posteriorConfidence'].indexOf(trialState) != -1){
             sketch.push();
               sketch.translate(this.x, this.y);
               sketch.image(thought, 0, 0, thoughtSize, thoughtSize);
@@ -786,7 +749,7 @@ jsPsych.plugins['source-choice'] = (function(){
           if(this.displayIndex <= 0){
             this.channelIndex = this.channel;
             this.stable = true;
-            if(trialState == 'tvStart' | trialState == 'tvsOn' | trialState == 'socialInfo'){
+            if(trialState == 'tvStart' | trialState == 'tvsOn'){
               this.jawMove();
             }
             if(trialState=='tvStart'){
@@ -806,7 +769,7 @@ jsPsych.plugins['source-choice'] = (function(){
           sketch.image(anchors[this.channel], 0, 0, tvSize.x, tvSize.y);
           sketch.image(jaws[this.channel], 0, this.jawOffset, tvSize.x, tvSize.y);
           this.stable = true;
-          if(trialState == 'tvStart' | trialState == 'tvsOn' | trialState == 'socialInfo'){
+          if(trialState == 'tvStart' | trialState == 'tvsOn'){
             this.jawMove();
           }
           if(trialState=='tvStart'){
