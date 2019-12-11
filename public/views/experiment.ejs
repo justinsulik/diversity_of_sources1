@@ -11,6 +11,7 @@
         <script language="javascript" src="jspsych/jspsych.js"></script>
         <script language="javascript" src="jspsych/plugins/jspsych-source-choice.js"></script>
         <script language="javascript" src="jspsych/plugins/jspsych-beast.js"></script>
+        <script language="javascript" src="jspsych/plugins/jspsych-instructions.js"></script>
         <link href="jspsych/css/jspsych.css" rel="stylesheet" type="text/css"></link>
         <link href="css/experiment.css" rel="stylesheet" type="text/css"></link>
     </head>
@@ -19,41 +20,94 @@
 
     timeline = []
 
-    // towns: riverside, burchester,
-
     // randomise anchor ids
     var anchorOrder = jsPsych.randomization.shuffle(_.range(7));
 
-    //
-    var beast = {
-      type: 'beast',
-      animals: ['bear', 'dolphin', 'elephant', 'rabbit', 'kangaroo'],
+    var welcome = {
+      type: 'instructions',
+      page: ['This is a demo of our experiment, for which we are looking for feedback. It involves 2 tasks.']
     }
 
-    var trial_low = {
+    var beast_instructions = {
+      type: 'instructions',
+      pages: ['For the first task, you will do 5 trials where you will see between 50 and 120 animals briefly displayed on your screen. '+
+      'You should try to <b>estimate</b> how many there are (though it will be too quick for you to actually count them).<br>',
+      "Once you've made a guess, we'll show you the guess of another Turker, who had previously done this task. "+
+      "Sometimes two heads are better than one! You can then choose to stick with your original estimate, or to update it in light of the other Turker's opinion.<br>"+
+      "Since we want you to estimate (rather than count), there is a time limit of 15 seconds for each trial, "+
+      "meaning that even if you take a screen cap before the image disappears, you won't have time to count the animals before your time is up."],
+      show_clickable_nav: true
+    }
+
+    var beast = {
+      type: 'beast',
+      animals: ['bear', 'kangaroo', 'koala', 'lion', 'rabbit'],
+    }
+
+    var mayor_instructions = {
+      type: 'instructions',
+      pages: ['In the next task, we will be telling you about some small towns in the US that are having elections for mayor']
+    }
+
+    var social_info_condition;
+    var conditional_instructions;
+    if(Math.random()<0.5){
+      social_info_condition = 'random';
+      conditional_instructions = "Click on each person to shuffle through the local TV channels for a random channel.";
+    } else {
+      social_info_condition = 'intentional';
+      conditional_instructions = "Click on each person's remote control, and they will turn on their most trusted local channel.";
+    }
+
+    var instructions_left = {
+      scenario: "Bob Smith is one of two candidates running for mayor of Greenville. His platform involves increasing the town's education budget, building more bicycle paths, and instituting equal pay.",
+      priorEstimate: 'How likely do you think Bob Smith is to win? Rate your belief on the scale below (click scale to confirm).',
+      tvStart: "The people of Smallville get most of their information from TV. " + conditional_instructions,
+      tvsOn: "Based on the news, the people of Smallville have each decided how likely they think Bob Smith is to win. Click 'next' to see their beliefs about his chances.",
+      socInfoCheck: 'Click on the person that thinks he has the highest chance.',
+      posteriorEstimate: "Have a look at people's opinions. What do you think Bob Smith's chances of winning are? Rate the likelihood on the scale below (click scale to confirm)."
+    }
+
+    var instructions_centrist = {
+      scenario: "Tod Brown is one of two candidates running for mayor of Kingston. His platform involves increasing jobs by improving roads and building houses.",
+      priorEstimate: 'How likely do you think Tod Brown is to win? Rate your belief on the scale below (click scale to confirm).',
+      tvStart: "The people of Kingston get most of their information from TV. " + conditional_instructions,
+      tvsOn: "Based on the news, the people of Kingston have each decided how likely they think Tod Brown is to win. Click 'next' to see their beliefs about his chances.",
+      socInfoCheck: 'Click on the person that thinks he has the highest chance.',
+      posteriorEstimate: "Have a look at people's opinions. What do you think Tod Brown's chances of winning are? Rate the likelihood on the scale below (click scale to confirm)."
+    }
+
+    var instructions_right = {
+      scenario: "Linda Johnson is one of two candidates running for mayor of Fairfield. Her platform involves reducing property taxes, hiring more police officers, and clearing a local slum.",
+      priorEstimate: 'How likely do you think Linda Jones is to win? Rate your belief on the scale below (click scale to confirm).',
+      tvStart: "The people of Glendale get most of their information from TV. " + conditional_instructions,
+      tvsOn: "Based on the news, the people of Glendale have each decided how likely they think Linda Jones is to win. Click 'next' to see their beliefs about her chances.",
+      socInfoCheck: 'Click on the person that thinks she has the highest chance.',
+      posteriorEstimate: "Have a look at people's opinions. What do you think Linda Jones's chances of winning are? Rate the likelihood on the scale below (click scale to confirm)."
+    }
+
+    var experimental_trials_instructions = jsPsych.randomization.shuffle([instructions_left, instructions_right]);
+
+    var mayor_settings = [
+      {instructions: instructions_centrist, agreement: 'agree', diversity: 'medium'},
+      {instructions: experimental_trials_instructions[0], agreement: 'disagree', diversity: 'high'},
+      {instructions: experimental_trials_instructions[1], agreement: 'disagree', diversity: 'low'}
+    ]
+    var mayor_settings_shuffled = jsPsych.randomization.shuffle(mayor_settings)
+
+    var mayor = {
       type: "source-choice",
-      choice_type: 'intentional',
-      // choice_type: 'random',
+      choice_type: social_info_condition,
       anchor_ids: anchorOrder.slice(0,7),
-      // diversity: 'low',
-      diversity: 'high',
-      // agreement: 'agree'
+      timeline: mayor_settings_shuffled,
+      randomize_order: true
     };
 
-    var trial_high = {
-      type: "source-choice",
-      // choice_type: 'intentional',
-      choice_type: 'random',
-      anchor_ids: anchorOrder.slice(2,7),
-      diversity: 'high',
-      candidate: 'Jane Doe',
-      platform: "Her platform involves reducing property taxes, hiring more police officers, and fighting corruption.",
-      town: 'Springfield',
-      nominative: 'she'
-    };
 
+    // timeline.push(beast_instructions);
     // timeline.push(beast);
-    timeline.push(trial_low);
+
+    timeline.push(mayor);
     // timeline.push(trial_high);
 
     jsPsych.init({

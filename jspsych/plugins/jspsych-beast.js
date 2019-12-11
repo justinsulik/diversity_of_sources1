@@ -21,7 +21,7 @@ jsPsych.plugins["beast"] = (function() {
       animals: {
         type: jsPsych.plugins.parameterType.STRING,
         array: true,
-        default: ['jaguar', 'mole', 'racoon', 'walrus', 'zebra']
+        default: ['bear', 'hamster', 'kangaroo', 'koala', 'lion', 'rabbit']
       },
       displayTime: {
         type: jsPsych.plugins.parameterType.INT,
@@ -89,9 +89,9 @@ jsPsych.plugins["beast"] = (function() {
 
     function getPlurals(animal){
       if(plurals[animal]){
-        return plurals[animal]
+        return plurals[animal];
       } else {
-        return animal + 's'
+        return animal + 's';
       }
     }
 
@@ -101,13 +101,13 @@ jsPsych.plugins["beast"] = (function() {
       animal = animals[trial_count];
       count = counts[trial_count];
       plural = getPlurals(animal);
-      $('#instructions-container').html('How many ' + plural + ' do you see?');
+      $('#instructions-container').html('How many ' + plural + '?');
       $('#response-container').html('<input id="'+stage+'-response" class="response" type="text"></input><button id="submit">Submit</button>');
       $('#initial-response').focus();
       var actualPositions = _.sampleSize(_.range(potentialPositions.x*potentialPositions.y), count);
       actualPositions.forEach(function(d){
-        var x = d%potentialPositions.x * ((sketchWidth-buffer)/potentialPositions.x)+6*(Math.random()-3)+buffer/2;
-        var y = Math.floor(d/potentialPositions.x) * ((sketchHeight-buffer)/potentialPositions.y)+4*(Math.random()-2)+buffer/2;
+        var x = d%potentialPositions.x * ((sketchWidth-buffer)/potentialPositions.x)+12*Math.random()-6+buffer/2;
+        var y = Math.floor(d/potentialPositions.x) * ((sketchHeight-buffer)/potentialPositions.y)+12*Math.random()-6+buffer/2;
         animalPositions.push({x: x, y: y});
       });
     }
@@ -134,7 +134,7 @@ jsPsych.plugins["beast"] = (function() {
         var time_on_screen = Date.now() - display_start_time;
         if(time_on_screen < trial.displayTime & stage == 'initial'){
           animalPositions.forEach(function(position){
-            sketch.image(animalImgs[animal], position.x, position.y, 40, 20);
+            sketch.image(animalImgs[animal], position.x, position.y, 30, 30);
           });
         }
         if(time_on_screen > trial.responseTime){
@@ -183,7 +183,7 @@ jsPsych.plugins["beast"] = (function() {
       var delta = _.sample([0.16, 0.18, 0.20, 0.22, 0.24]);
       social_info = Math.floor((1+direction*delta)*response);
       plural = getPlurals(animal);
-      $('#instructions-container').html('You guessed <b>'+response+'</b>. Previously, another Turker guessed <b>'+ social_info + '</b>. You can stick with your initial guess or change it. How many ' + plural + ' do you think there are?');
+      $('#instructions-container').html('You guessed <b>'+response+'</b>. Previously, another Turker guessed <b>'+ social_info + '</b>. You can stick with your initial guess or change it. How many ' + plural + ' do you think there were?');
       $('#response-container').html('<input id="'+stage+'-response" class="response" type="text"></input><button id="submit">Submit</button>');
       $('#social-response').focus();
     }
