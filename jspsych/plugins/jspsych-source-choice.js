@@ -31,15 +31,16 @@ jsPsych.plugins['source-choice'] = (function(){
         default: 'likelihood',
         description: 'Options: "likelihood" or "favorable"'
       },
-      agents: {
-        type: jsPsych.plugins.parameterType.INT,
-        default: 5,
-        description: 'Number of agents. Gets overridden if it clashes with any of the social_info params'
+      agent_ids: {
+        type: jsPsych.plugins.parameterType.OBJECT,
+        default: [{gender: 'm', hair: 0}, {gender: 'm', hair: 1}, {gender: 'f', hair: 0}, {gender: 'f', hair: 1}, {gender: 'f', hair: 2}],
+        array: true,
+        description: 'IDs of agents'
       },
       diversity: {
         type: jsPsych.plugins.parameterType.STRING,
         default: 'high',
-        description: 'If "high" then all TVs different; if "low" then all the same'
+        description: 'If "high" then all TVs different; if "med" then one repeated 3 times; if "low" one repeated 4 times'
       },
       anchor_ids: {
         type: jsPsych.plugins.parameterType.INT,
@@ -223,19 +224,18 @@ jsPsych.plugins['source-choice'] = (function(){
     function displayId(){
       // depending on the trial condition (diversity = high/med/low) create a dictionary with agent# as key and tv station ID as val
       var displayDict = {};
-      var keys = _.range(0,trial.agents);
+      var keys = _.range(0,trial.agent_ids.length);
       var keys_shuffled = jsPsych.randomization.shuffle(keys);
       var channelCount = {'low': 2, 'medium': 3, 'high': 5};
       var channels = _.range(0, channelCount[trial.diversity]);
       var duplicate = channels[channelCount[trial.diversity]-1];
-      for(i = channelCount[trial.diversity]; i < trial.agents; i++){
+      for(i = channelCount[trial.diversity]; i < trial.agent_ids.length; i++){
         channels.push(duplicate);
       }
       var channels_shuffled = jsPsych.randomization.shuffle(channels);
       keys_shuffled.forEach(function(d, i){
         displayDict[d] = channels_shuffled[i];
       });
-      console.log(displayDict);
       return displayDict;
     }
 
@@ -416,8 +416,8 @@ jsPsych.plugins['source-choice'] = (function(){
       var remotesImg = [];
       var remotes = [];
 
-      var agentCount = trial.agents;
-      var agentParts = {m: {hair: []}, f: {hair: {}}};
+      var agentCount = trial.agent_ids.length;
+      var agentParts = {m: {hair: {}}, f: {hair: {}}};
       var sketchWidth = 900;
       var sketchHeight = 600;
       var agentSize = 100;
@@ -865,32 +865,31 @@ jsPsych.plugins['source-choice'] = (function(){
 
         thought = sketch.loadImage('img/thought.png');
 
+
+
         agentParts.f.body = sketch.loadImage('img/agents/f_body.png');
         agentParts.f.head = sketch.loadImage('img/agents/f_head.png');
-        agentParts.f.hair[0] = sketch.loadImage('img/agents/f_hair_1.png');
-        agentParts.f.hair[1] = sketch.loadImage('img/agents/f_hair_2.png');
-        agentParts.f.hair[2] = sketch.loadImage('img/agents/f_hair_3.png');
         agentParts.f.feet = sketch.loadImage('img/agents/feet.png');
         agentParts.f.legs = sketch.loadImage('img/agents/f_legs.png');
+
         agentParts.m.body = sketch.loadImage('img/agents/m_body.png');
         agentParts.m.head = sketch.loadImage('img/agents/m_head.png');
-        agentParts.m.hair[0] = sketch.loadImage('img/agents/m_hair_1.png');
-        agentParts.m.hair[1] = sketch.loadImage('img/agents/m_hair_2.png');
-        agentParts.m.hair[2] = sketch.loadImage('img/agents/m_hair_3.png');
         agentParts.m.feet = sketch.loadImage('img/agents/feet.png');
         agentParts.m.legs = sketch.loadImage('img/agents/m_legs.png');
 
-        var factors = {gender: ['m', 'f'], hair: [0, 1, 2]};
-        var ids = jsPsych.randomization.factorial(factors, 1);
+        trial.agent_ids.forEach(function(d,i){
+          var gender = d.gender;
+          var hair = d.hair;
+          var imgPath = 'img/agents/'+gender+'_hair_'+hair+'.png';
+          agentParts[gender].hair[hair] = sketch.loadImage(imgPath);
+          agents[i] = new Agent(gender, hair, i);
+        })
 
         for(var j = 0; j<agentCount; j++){
           tvs[j] = sketch.loadImage('img/tv/tv_'+j+'.png');
           if(trial.choice_type=='intentional'){
             remotesImg[j] = sketch.loadImage('img/remotes/'+j+'.png');
           }
-          var gender = ids[j].gender;
-          var hair = ids[j].hair;
-          agents[j] = new Agent(gender, hair, j);
         }
         trial.anchor_ids.forEach(function(d,i){
           backgrounds[i] = sketch.loadImage('img/tv/channel_'+d+'.png');
