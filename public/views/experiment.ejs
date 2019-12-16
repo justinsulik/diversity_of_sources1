@@ -53,43 +53,43 @@
     var conditional_instructions;
     if(Math.random()<0.5){
       social_info_condition = 'random';
-      conditional_instructions = "Click on each person to shuffle through the local TV channels for a random channel.";
+      conditional_instructions = "Click on each person's <b>TV</b>, which will shuffle through the local TV channels and select a <b>random</b> channel for them to watch.";
     } else {
       social_info_condition = 'intentional';
-      conditional_instructions = "Click on each person's remote control, and they will turn on their most trusted local channel.";
+      conditional_instructions = "Click on each person's <b>remote control</b>, and they will turn on their most trusted local channel.";
     }
 
-    var instructions_left = {
+    var mayor_instructions_left = {
       scenario: "Bob Smith is one of two candidates running for mayor of Greenville. His platform involves increasing the town's education budget, building more bicycle paths, and instituting equal pay.",
       priorEstimate: 'How likely do you think Bob Smith is to win? Rate your belief on the scale below (click scale to confirm).',
-      tvStart: "The people of Smallville get most of their information from TV. " + conditional_instructions,
-      tvsOn: "Based on the news, the people of Smallville have each decided how likely they think Bob Smith is to win. Click 'next' to see their beliefs about his chances.",
-      socInfoCheck: 'Click on the person that thinks he has the highest chance.',
+      tvStart: "In Greenville, there has been a lot of discussion about the election on TV. " + conditional_instructions,
+      tvsOn: "The people of Greenville have each decided how likely they think Bob Smith is to win. Click 'next' to see their beliefs about his chances.",
+      socInfoCheck: 'Click on the <b>person</b> that thinks he has the highest chance.',
       posteriorEstimate: "Have a look at people's opinions. What do you think Bob Smith's chances of winning are? Rate the likelihood on the scale below (click scale to confirm)."
     }
 
-    var instructions_centrist = {
+    var mayor_instructions_centrist = {
       scenario: "Tod Brown is one of two candidates running for mayor of Kingston. His platform involves increasing jobs by improving roads and building houses.",
       priorEstimate: 'How likely do you think Tod Brown is to win? Rate your belief on the scale below (click scale to confirm).',
-      tvStart: "The people of Kingston get most of their information from TV. " + conditional_instructions,
-      tvsOn: "Based on the news, the people of Kingston have each decided how likely they think Tod Brown is to win. Click 'next' to see their beliefs about his chances.",
-      socInfoCheck: 'Click on the person that thinks he has the highest chance.',
+      tvStart: "In Kingston, there has been a lot of discussion about the election on TV. " + conditional_instructions,
+      tvsOn: "The people of Kingston have each decided how likely they think Tod Brown is to win. Click 'next' to see their beliefs about his chances.",
+      socInfoCheck: 'Click on the <b>person</b> that thinks he has the highest chance.',
       posteriorEstimate: "Have a look at people's opinions. What do you think Tod Brown's chances of winning are? Rate the likelihood on the scale below (click scale to confirm)."
     }
 
-    var instructions_right = {
+    var mayor_instructions_right = {
       scenario: "Linda Johnson is one of two candidates running for mayor of Fairfield. Her platform involves reducing property taxes, hiring more police officers, and clearing a local slum.",
       priorEstimate: 'How likely do you think Linda Jones is to win? Rate your belief on the scale below (click scale to confirm).',
-      tvStart: "The people of Glendale get most of their information from TV. " + conditional_instructions,
-      tvsOn: "Based on the news, the people of Glendale have each decided how likely they think Linda Jones is to win. Click 'next' to see their beliefs about her chances.",
-      socInfoCheck: 'Click on the person that thinks she has the highest chance.',
+      tvStart: "In Fairfield, there has been a lot of discussion about the election on TV. " + conditional_instructions,
+      tvsOn: "The people of Fairfield have each decided how likely they think Linda Jones is to win. Click 'next' to see their beliefs about her chances.",
+      socInfoCheck: 'Click on the <b>person</b> that thinks she has the highest chance.',
       posteriorEstimate: "Have a look at people's opinions. What do you think Linda Jones's chances of winning are? Rate the likelihood on the scale below (click scale to confirm)."
     }
 
-    var experimental_trials_instructions = jsPsych.randomization.shuffle([instructions_left, instructions_right]);
+    var experimental_trials_instructions = jsPsych.randomization.shuffle([mayor_instructions_left, mayor_instructions_right]);
 
     var mayor_settings = [
-      {instructions: instructions_centrist, agreement: 'agree', diversity: 'medium'},
+      {instructions: mayor_instructions_centrist, agreement: 'agree', diversity: 'medium'},
       {instructions: experimental_trials_instructions[0], agreement: 'disagree', diversity: 'high'},
       {instructions: experimental_trials_instructions[1], agreement: 'disagree', diversity: 'low'}
     ]
@@ -104,11 +104,60 @@
     };
 
 
+    // moral dillema
+
+    var moral_instructions_weed = {
+      scenario: "The people of Greenville have been thinking about whether cannabis should be decriminalized.",
+      priorEstimate: 'In general, how do you view <b>recreational cannabis use</b>? Rate your belief on the scale below (click scale to confirm).',
+      tvStart: "In Greenville, there has been a lot of discussion about this issue on TV recently. " + conditional_instructions,
+      tvsOn: "The people of Greenville have each decided how they feel about recreational cannabis use. Click 'next' to see their beliefs about this issue.",
+      socInfoCheck: 'Click on the <b>person</b> that views this most favorably.',
+      posteriorEstimate: "Have a look at people's opinions. How favorably do you view recreational cannabis use? Rate the favorability on the scale below (click scale to confirm)."
+    }
+
+    var moral_instructions_guns = {
+      scenario: "The people of Kingston have been thinking about whether gun licences should require tougher background checks.",
+      priorEstimate: 'In general, how do you view <b>tougher background checks on gun licences</b>? Rate your belief on the scale below (click scale to confirm).',
+      tvStart: "In Kingston, there has been a lot of discussion about this issue on TV recently. " + conditional_instructions,
+      tvsOn: "The people of Greenville have each decided how they feel about tougher background checks on gun licences. Click 'next' to see their beliefs about this issue.",
+      socInfoCheck: 'Click on the <b>person</b> that views this most favorably.',
+      posteriorEstimate: "Have a look at people's opinions. How favorably do you view tougher background checks on gun licences? Rate the favorability on the scale below (click scale to confirm)."
+    }
+
+    var moral_instructions_immigration = {
+      scenario: "The people of Fairfield have been thinking about whether immigration to the USA should be reduced.",
+      priorEstimate: 'In general, how do you view <b>stricter immigration policies</b>? Rate your belief on the scale below (click scale to confirm).',
+      tvStart: "In Fairfield, there has been a lot of discussion about this issue on TV recently. " + conditional_instructions,
+      tvsOn: "The people of Fairfield have each decided how they feel about stricker immigration policies. Click 'next' to see their beliefs about this issue.",
+      socInfoCheck: 'Click on the <b>person</b> that views this most favorably.',
+      posteriorEstimate: "Have a look at people's opinions. How favorably do you view stricter immigration policies? Rate the favorability on the scale below (click scale to confirm)."
+    }
+
+    var moral_trials_instructions = jsPsych.randomization.shuffle([moral_instructions_weed, moral_instructions_guns, moral_instructions_immigration]);
+    var moral_agreements = jsPsych.randomization.shuffle(['agree', 'agree', 'disagree'])
+    var moral_diversity = jsPsych.randomization.shuffle(['low', 'medium', 'high'])
+
+    var moral_settings = [
+      {instructions: moral_trials_instructions[0], agreement: moral_agreements[0], diversity: moral_diversity[0]},
+      {instructions: moral_trials_instructions[1], agreement: moral_agreements[1], diversity: moral_diversity[1]},
+      {instructions: moral_trials_instructions[2], agreement: moral_agreements[2], diversity: moral_diversity[2]}
+    ]
+    var moral_settings_shuffled = jsPsych.randomization.shuffle(moral_settings)
+
+    var moral = {
+      type: "source-choice",
+      choice_type: social_info_condition,
+      anchor_ids: anchorOrder.slice(0,7),
+      timeline: moral_settings_shuffled,
+      rating_type: 'favorable',
+      randomize_order: true
+    };
+
     // timeline.push(beast_instructions);
     // timeline.push(beast);
 
-    timeline.push(mayor);
-    // timeline.push(trial_high);
+    // timeline.push(mayor);
+    timeline.push(moral);
 
     jsPsych.init({
         timeline: timeline

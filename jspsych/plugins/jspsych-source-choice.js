@@ -29,7 +29,7 @@ jsPsych.plugins['source-choice'] = (function(){
         type: jsPsych.plugins.parameterType.STRING,
         pretty_name: 'Rating type',
         default: 'likelihood',
-        description: 'Options: "likelihood" or "permissibility"'
+        description: 'Options: "likelihood" or "favorable"'
       },
       agents: {
         type: jsPsych.plugins.parameterType.INT,
@@ -211,11 +211,11 @@ jsPsych.plugins['source-choice'] = (function(){
     var rating_alert;
     var check_alert;
     if(trial.rating_type=='likelihood'){
-      rating_alert = 'Click on the bar to rate how likely you think it is';
+      rating_alert = 'Click on the bar to rate how <b>likely</b> you think this is.';
       check_alert = 'No, look closely. Someone else thinks there is an even higher chance.';
     } else {
-      rating_alert = 'Click on the bar to rate how permissible you think it is';
-      check_alert = 'No, look closely. Someone else thinks it is even more permissible.';
+      rating_alert = 'Click on the bar to rate how <b>favorably</b> you view this.';
+      check_alert = 'No, look closely. Someone else has an even more favorable view.';
     }
 
     // trial functions
@@ -459,9 +459,9 @@ jsPsych.plugins['source-choice'] = (function(){
         if(this.type == 'likelihood'){
           this.y = 200;
           this.labels = ['Very unlikely', 'Very likely'];
-        } else if (this.type == 'permissibility'){
+        } else if (this.type == 'favorable'){
           this.y = 200;
-          this.labels = ['Impermissible', 'Permissible'];
+          this.labels = ['Very unfavorably', 'Very favorably'];
         } else {
           this.y = 350;
           this.labels = ['Very unsure', 'Very sure'];
@@ -479,7 +479,7 @@ jsPsych.plugins['source-choice'] = (function(){
               return 'hidden';
             }
           }
-          if(this.type == 'likelihood' | this.type == 'permissibility'){
+          if(this.type == 'likelihood' | this.type == 'favorable'){
             if(/Estimate/.test(trialState)){
               return 'show';
             } else if(/Confidence/.test(trialState)) {
@@ -560,7 +560,7 @@ jsPsych.plugins['source-choice'] = (function(){
 
         this.foreground = function(){
           if(/Estimate/.test(trialState)){
-            if(this.type == 'likelihood' | this.type == 'permissibility'){
+            if(this.type == 'likelihood' | this.type == 'favorable'){
               return true;
             } else {
               return false;
