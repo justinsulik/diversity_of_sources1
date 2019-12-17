@@ -10,6 +10,7 @@
         <script language="javascript" src="libraries/jstat.min.js"></script>
         <script language="javascript" src="jspsych/jspsych.js"></script>
         <script language="javascript" src="jspsych/plugins/jspsych-source-choice.js"></script>
+        <script language="javascript" src="jspsych/plugins/jspsych-source-choice-training.js"></script>
         <script language="javascript" src="jspsych/plugins/jspsych-beast.js"></script>
         <script language="javascript" src="jspsych/plugins/jspsych-instructions.js"></script>
         <link href="jspsych/css/jspsych.css" rel="stylesheet" type="text/css"></link>
@@ -25,15 +26,16 @@
 
     var welcome = {
       type: 'instructions',
-      page: ['This is a demo of our experiment, for which we are looking for feedback. It involves 2 tasks.']
+      page: ['In this study, you will be doing two main tasks. First is a number estimation task. Second, we\'ll give you information about some small towns and ask you to make some decisions.'],
+      show_clickable_nav: true,
     }
 
     var beast_instructions = {
       type: 'instructions',
       pages: ['For the first task, you will do 5 trials where you will see between 50 and 120 animals briefly displayed on your screen. '+
-      'You should try to <b>estimate</b> how many there are (though it will be too quick for you to actually count them).<br>',
-      "Once you've made a guess, we'll show you the guess of another Turker, who had previously done this task. "+
-      "Sometimes two heads are better than one! You can then choose to stick with your original estimate, or to update it in light of the other Turker's opinion.<br>"+
+      'You should try to <b>estimate</b> how many there are, though it will be too quick for you to actually count them.<br><br>',
+      "Once you've made a guess, we'll show you the guess of another Turker, who previously did this task. "+
+      "Sometimes two heads are better than one! You can then choose to stick with your original estimate, or to update it in light of the other Turker's opinion.<br><br>"+
       "Since we want you to estimate (rather than count), there is a time limit of 15 seconds for each trial, "+
       "meaning that even if you take a screen cap before the image disappears, you won't have time to count the animals before your time is up."],
       show_clickable_nav: true
@@ -42,6 +44,76 @@
     var beast = {
       type: 'beast',
       animals: ['bear', 'kangaroo', 'koala', 'lion', 'rabbit'],
+    }
+
+    var estimation_instructions1 = {
+      type: 'instructions',
+      pages: ['For the second task, you will make some decisions.<br><br>'+
+        'The first main decision you will make is whether you think something is <b>morally ok</b>.<br><br>'+
+        'We are only interested in what you think <b>generally</b>, '+
+        'so don\'t worry about thinking up special cases where maybe a rule could be broken. '+
+        'For instance, you might think it\'s generally bad to kill people, '+
+        'regardless of whether it might be ok in an unlikely situation where you could travel back in time to kill Hitler.<br><br>',
+        'We are interested in whether it\'s morally ok for <b>people in general</b>, not in whether <b>you</b> do it yourself. '+
+        'For instance, even if you don\'t drink alchohol, you might still think it\'s morally ok for other people to do so, in which case you\'d rate this as acceptable.<br><br>'+
+        'For each decision, you\'ll also rate how confident you are in your answer. For instance, you might think something is probably morally ok, but be quite unsure about it.',
+        'Every time you have to make a <b>moral</b> judgment, we will indicate it using these scales:<br><img src="img/icons/moral.png" style="width:200px"></img>'
+      ],
+      show_clickable_nav: true
+    }
+
+    var estimation_practice1 = {
+      type: 'source-choice-training',
+      rating_type: 'morality',
+      main_instructions: 'For example, how acceptable do you think <b>spanking children</b> is? If you mouse over the scale below, it will reflect different ratings from "completely unacceptable" to "completely acceptable". <b>Only click once you have made your decision.</b>',
+      secondary_instructions: 'How confident are you about your decision? Again, mousing over the scale will reflect different ratings. Clicking on the scale will make your decision.'
+    }
+
+    var estimation_practice2 = {
+      type: 'source-choice-training',
+      rating_type: 'morality',
+      main_instructions: 'Another example, how acceptable do you think <b>helping poor people</b> is? Mouse over the scale, and click when you\'ve made your decision.',
+      secondary_instructions: 'How confident are you about your decision?'
+    }
+
+    var estimation_instructions2 = {
+      type: 'instructions',
+      pages: ['The other main decision you will make is how <b>likely</b> something is. '+
+      'For example, there is a 50% chance of a fair coin coming up heads.<br><br>'+
+      'Specifically, here you will be deciding the likelihood of <b>election</b> results.',
+      'We are interested in what you think the <b>election outcome</b> will be, not in how <b>you</b> would vote personally.<br><br>'+
+      'For example, you might think that president Trump is going to win re-election, even if you don\'t like him yourself (or the reverse!).<br><br>'+
+      'Essentially, you are trying to predict the election outcome.<br><br>'+
+      'Once more, we will ask you for your confidence about your decision. For instance, you might think that someone is likely to win, but be quite unsure about it.',
+      'Every time you have to make a judgment about the <b>likelihood</b> of an election outcome, we will indicate it using this ballot box:<br><img src="img/icons/vote.png" style="width:200px"></img>'
+      ],
+      show_clickable_nav: true,
+    }
+
+    var estimation_practice3 = {
+      type: 'source-choice-training',
+      rating_type: 'likelihood',
+      main_instructions: 'For example, how likely do you think Trump is to win re-election?? If you mouse over the scale below, it will reflect different ratings from "Very unlikely" to "Very likely". <b>Only click once you have made your decision.</b>',
+      secondary_instructions: 'How confident are you about your decision? Again, mousing over the scale will reflect different ratings. Clicking on the scale will make your decision.'
+    }
+
+    var estimation_practice4 = {
+      type: 'source-choice-training',
+      rating_type: 'morality',
+      main_instructions: 'Another example, how likely do you think it is that a Democrat would win as governor of your state in the next election? Mouse over the scale, and click when you\'ve made your decision.',
+      secondary_instructions: 'How confident are you about your decision?'
+    }
+
+    var final_instructions = {
+      type: 'instructions',
+      pages: ['Now that you\'ve been shown how to use the scales, we will begin the task. We will visit three small American towns, one after the other.<br><br>'+
+      'For each town, you will make one judgment about morality, and one judgment about the likelihood of an outcome in a local election. '+
+      'In both cases, you will also be shown the opinions of random samples of the local population.<br><br>'+
+      'You can assume that each sample of people is typical of the area. '+
+      'You can also assume that they are informed about the issues - they have learned about them from local TV stations.',
+      'In each case, we will ask you to make an estimate, and then show you what the locals think. Finally, you will be able to update your estimate.'
+      ],
+      show_clickable_nav: true
     }
 
     // set up agents
@@ -172,6 +244,8 @@
       pages: ['In the next task, we will be telling you about some small towns in the US that are having elections for mayor']
     }
 
+    // set up condition
+
     var social_info_condition;
     var conditional_instructions;
     if(Math.random()<0.5){
@@ -181,6 +255,17 @@
       social_info_condition = 'intentional';
       conditional_instructions = "Click on each person's <b>remote control</b>, and they will turn on their most trusted local channel.";
     }
+
+    // set up scenarios
+
+    var trial_order = jsPsych.randomization.shuffle(_.range(3));
+    // var mayor_agreement = _.map(trial_order, function(d){
+    //   if(d==1){
+    //     return 'agree'
+    //   } else {
+    //     return 'disagree'
+    //   }
+    // })
 
     var mayor_instructions_left = {
       scenario: "Bob Smith is one of two candidates running for mayor of Greenville. His platform involves increasing the town's education budget, building more bicycle paths, and instituting equal pay.",
@@ -209,65 +294,56 @@
       posteriorEstimate: "Have a look at people's opinions. What do you think Linda Jones's chances of winning are? Rate the likelihood on the scale below (click scale to confirm)."
     }
 
-    var experimental_trials_instructions = jsPsych.randomization.shuffle([mayor_instructions_left, mayor_instructions_right]);
+    var mayor_diversity = jsPsych.randomization.shuffle(['low', 'high'])
 
     var mayor_settings = [
+      {instructions: mayor_instructions_left,
+        agreement: 'disagree',
+        diversity: mayor_diversity[0],
+        agent_ids: agents.slice(0, 5),
+        channel_ids: groups[0],
+        data: {trial_no: 0}},
       {instructions: mayor_instructions_centrist,
         agreement: 'agree',
         diversity: 'medium',
-        trial_no: 0,
-        agent_ids: agents.slice(0, 5),
-        channel_ids: groups[0]},
-      {instructions: experimental_trials_instructions[0],
-        agreement: 'disagree',
-        diversity: 'high',
-        trial_no: 1,
         agent_ids: agents.slice(5,10),
-        channel_ids: groups[1]},
-      {instructions: experimental_trials_instructions[1],
+        channel_ids: groups[1],
+        data: {trial_no: 1}},
+      {instructions: mayor_instructions_right,
         agreement: 'disagree',
-        diversity: 'low',
-        trial_no: 2,
+        diversity: mayor_diversity[1],
         agent_ids: agents.slice(10,15),
-        channel_ids: groups[2]}
+        channel_ids: groups[2],
+        data: {trial_no: 2}}
     ]
-    var mayor_settings_shuffled = jsPsych.randomization.shuffle(mayor_settings)
-
-    var mayor = {
-      type: "source-choice",
-      choice_type: social_info_condition,
-      anchor_ids: anchorOrder.slice(0,7),
-      timeline: mayor_settings_shuffled,
-      randomize_order: true
-    };
 
     // moral dillema
 
     var moral_instructions_weed = {
       scenario: "The people of Greenville have been thinking about whether cannabis should be decriminalized.",
-      priorEstimate: 'In general, how do you view <b>recreational cannabis use</b>? Rate your belief on the scale below (click scale to confirm).',
+      priorEstimate: 'In general, how do you view <b>recreational cannabis use</b>? Rate the acceptability on the scale below (click scale to confirm).',
       tvStart: "In Greenville, there has been a lot of discussion about this issue on TV recently. " + conditional_instructions,
       tvsOn: "The people of Greenville have each decided how they feel about recreational cannabis use. Click 'next' to see their beliefs about this issue.",
       socInfoCheck: 'Click on the <b>person</b> that views this most favorably.',
-      posteriorEstimate: "Have a look at people's opinions. How favorably do you view recreational cannabis use? Rate the favorability on the scale below (click scale to confirm)."
+      posteriorEstimate: "Have a look at people's opinions. How acceptable do you think recreational cannabis use is? Rate acceptability on the scale below (click scale to confirm)."
     }
 
     var moral_instructions_guns = {
       scenario: "The people of Kingston have been thinking about whether gun licences should require tougher background checks.",
-      priorEstimate: 'In general, how do you view <b>tougher background checks on gun licences</b>? Rate your belief on the scale below (click scale to confirm).',
+      priorEstimate: 'In general, how do you view <b>tougher background checks on gun licences</b>? Rate the acceptability on the scale below (click scale to confirm).',
       tvStart: "In Kingston, there has been a lot of discussion about this issue on TV recently. " + conditional_instructions,
       tvsOn: "The people of Kingston have each decided how they feel about tougher background checks on gun licences. Click 'next' to see their beliefs about this issue.",
       socInfoCheck: 'Click on the <b>person</b> that views this most favorably.',
-      posteriorEstimate: "Have a look at people's opinions. How favorably do you view tougher background checks on gun licences? Rate the favorability on the scale below (click scale to confirm)."
+      posteriorEstimate: "Have a look at people's opinions. How acceptable do you think tougher background checks on gun licences is? Rate the acceptability on the scale below (click scale to confirm)."
     }
 
     var moral_instructions_immigration = {
       scenario: "The people of Fairfield have been thinking about whether immigration to the USA should be reduced.",
-      priorEstimate: 'In general, how do you view <b>stricter immigration policies</b>? Rate your belief on the scale below (click scale to confirm).',
+      priorEstimate: 'In general, how do you view <b>stricter immigration policies</b>? Rate the acceptability on the scale below (click scale to confirm).',
       tvStart: "In Fairfield, there has been a lot of discussion about this issue on TV recently. " + conditional_instructions,
       tvsOn: "The people of Fairfield have each decided how they feel about stricker immigration policies. Click 'next' to see their beliefs about this issue.",
       socInfoCheck: 'Click on the <b>person</b> that views this most favorably.',
-      posteriorEstimate: "Have a look at people's opinions. How favorably do you view stricter immigration policies? Rate the favorability on the scale below (click scale to confirm)."
+      posteriorEstimate: "Have a look at people's opinions. How acceptable do you think stricter immigration policies are? Rate the acceptability on the scale below (click scale to confirm)."
     }
 
     var moral_trials_instructions = jsPsych.randomization.shuffle([moral_instructions_weed, moral_instructions_guns, moral_instructions_immigration]);
@@ -275,41 +351,64 @@
     var moral_diversity = jsPsych.randomization.shuffle(['low', 'medium', 'high'])
 
     var moral_settings = [
-      {instructions: moral_trials_instructions[0],
+      {instructions: moral_instructions_weed,
         agreement: moral_agreements[0],
         diversity: moral_diversity[0],
-        trial_no: 3,
         agent_ids: agents.slice(15,20),
-        channel_ids: groups[0]},
-      {instructions: moral_trials_instructions[1],
+        channel_ids: groups[0],
+        data: {trial_no: 3}},
+      {instructions: moral_instructions_guns,
         agreement: moral_agreements[1],
         diversity: moral_diversity[1],
-        trial_no: 4,
         agent_ids: agents.slice(20,25),
-        channel_ids: groups[1]},
-      {instructions: moral_trials_instructions[2],
+        channel_ids: groups[1],
+        data: {trial_no: 4}},
+      {instructions: moral_instructions_immigration,
         agreement: moral_agreements[2],
         diversity: moral_diversity[2],
-        trial_no: 5,
         agent_ids: agents.slice(25,30),
-        channel_ids: groups[2]}
+        channel_ids: groups[2],
+        data: {trial_no: 5}}
     ]
-    var moral_settings_shuffled = jsPsych.randomization.shuffle(moral_settings)
-
-    var moral = {
-      type: "source-choice",
-      choice_type: social_info_condition,
-      anchor_ids: anchorOrder.slice(0,7),
-      timeline: moral_settings_shuffled,
-      rating_type: 'favorable',
-      randomize_order: true
-    };
 
     // timeline.push(beast_instructions);
     // timeline.push(beast);
 
-    timeline.push(mayor);
-    timeline.push(moral);
+    // timeline.push(estimation_instructions1)
+    // timeline.push(estimation_practice1)
+    // timeline.push(estimation_practice2)
+    //
+    // timeline.push(estimation_instructions2)
+    // timeline.push(estimation_practice3)
+    // timeline.push(estimation_practice4)
+    // timeline.push(final_instructions)
+
+    trial_order.forEach(function(d, i){
+
+      var moral = {
+        type: "source-choice",
+        choice_type: social_info_condition,
+        timeline: [moral_settings[d]],
+        rating_type: 'morality',
+        on_finish: function(data){
+          console.log(data)
+        }
+      };
+
+      // var mayor = {
+      //   type: "source-choice",
+      //   choice_type: social_info_condition,
+      //   timeline: [mayor_settings[d]],
+      //   rating_type: 'likelihood',
+      // };
+
+      timeline.push(moral)
+      // timeline.push(mayor)
+
+    })
+
+    console.log(timeline)
+
 
     jsPsych.init({
         timeline: timeline
