@@ -42,11 +42,11 @@ jsPsych.plugins['source-choice'] = (function(){
         default: 'high',
         description: 'If "high" then all TVs different; if "med" then one repeated 3 times; if "low" one repeated 4 times'
       },
-      anchor_ids: {
+      channel_ids: {
         type: jsPsych.plugins.parameterType.INT,
         array: true,
         default: [0, 1, 2, 3, 4],
-        description: 'Which anchor IDs to use (shuffle in main expt script)'
+        description: 'Which channel IDs to use (shuffle in main expt script)'
       },
       agreement: {
         type: jsPsych.plugins.parameterType.STRING,
@@ -212,10 +212,10 @@ jsPsych.plugins['source-choice'] = (function(){
     var rating_alert;
     var check_alert;
     if(trial.rating_type=='likelihood'){
-      rating_alert = 'Click on the bar to rate how <b>likely</b> you think this is.';
+      rating_alert = 'Click on the bar to rate how likely you think this is.';
       check_alert = 'No, look closely. Someone else thinks there is an even higher chance.';
     } else {
-      rating_alert = 'Click on the bar to rate how <b>favorably</b> you view this.';
+      rating_alert = 'Click on the bar to rate how favorably you view this.';
       check_alert = 'No, look closely. Someone else has an even more favorable view.';
     }
 
@@ -411,7 +411,6 @@ jsPsych.plugins['source-choice'] = (function(){
       var thought;
       var tvs = [];
       var backgrounds = [];
-      var anchors = [];
       var jaws = [];
       var remotesImg = [];
       var remotes = [];
@@ -431,7 +430,7 @@ jsPsych.plugins['source-choice'] = (function(){
           {r: 247, g: 147, b: 35}, {r: 9, g: 202, b: 237}];
       var hairColors = [{r: 236, g: 236, b: 25}, {r: 160, g: 68, b: 11}, {r: 167, g: 113, b: 13},
           {r: 93, g: 51, b: 4}, {r: 39, g: 26, b: 11}];
-      var headColors = [{r: 79, g: 44, b: 16}, {r: 220, g: 182, b: 83}, {r: 250, g: 235, b: 173},
+      var headColors = [{r: 117, g: 60, b: 16}, {r: 220, g: 182, b: 83}, {r: 250, g: 235, b: 173},
           {r: 209, g: 160, b: 69}, {r: 124, g: 93, b: 35}];
       var legColors = [{r: 43, g: 107, b: 171}, {r: 114, g: 181, b: 249}, {r: 41, g: 83, b: 125},
           {r: 130, g: 150, b: 169}, {r: 194, g: 188, b: 175}];
@@ -729,7 +728,7 @@ jsPsych.plugins['source-choice'] = (function(){
         if(trial.choice_type == 'random'){
           var displaySequence = [];
           for(var i = 0; i<passes; i++){
-            trial.anchor_ids.forEach(function(d,i){
+            trial.channel_ids.forEach(function(d,i){
               displaySequence.push(i);
             });
           }
@@ -768,13 +767,13 @@ jsPsych.plugins['source-choice'] = (function(){
             this.channelIndex = this.displaySequence[this.displayIndex];
           }
           sketch.image(backgrounds[this.channelIndex], 0, 0, tvSize.x, tvSize.y);
-          sketch.image(anchors[this.channelIndex], 0, 0, tvSize.x, tvSize.y);
+          // sketch.image(anchors[this.channelIndex], 0, 0, tvSize.x, tvSize.y);
           sketch.image(jaws[this.channelIndex], 0, this.jawOffset, tvSize.x, tvSize.y);
         };
 
         this.showLogo = function(){
           sketch.image(backgrounds[this.channel], 0, 0, tvSize.x, tvSize.y);
-          sketch.image(anchors[this.channel], 0, 0, tvSize.x, tvSize.y);
+          // sketch.image(anchors[this.channel], 0, 0, tvSize.x, tvSize.y);
           sketch.image(jaws[this.channel], 0, this.jawOffset, tvSize.x, tvSize.y);
           this.stable = true;
           if(trialState == 'tvStart' | trialState == 'tvsOn'){
@@ -865,8 +864,6 @@ jsPsych.plugins['source-choice'] = (function(){
 
         thought = sketch.loadImage('img/thought.png');
 
-
-
         agentParts.f.body = sketch.loadImage('img/agents/f_body.png');
         agentParts.f.head = sketch.loadImage('img/agents/f_head.png');
         agentParts.f.feet = sketch.loadImage('img/agents/feet.png');
@@ -883,18 +880,18 @@ jsPsych.plugins['source-choice'] = (function(){
           var imgPath = 'img/agents/'+gender+'_hair_'+hair+'.png';
           agentParts[gender].hair[hair] = sketch.loadImage(imgPath);
           agents[i] = new Agent(gender, hair, i);
-        })
+        });
 
         for(var j = 0; j<agentCount; j++){
+          console.log('tv counter', j)
           tvs[j] = sketch.loadImage('img/tv/tv_'+j+'.png');
           if(trial.choice_type=='intentional'){
             remotesImg[j] = sketch.loadImage('img/remotes/'+j+'.png');
           }
         }
-        trial.anchor_ids.forEach(function(d,i){
+        trial.channel_ids.forEach(function(d,i){
           backgrounds[i] = sketch.loadImage('img/tv/channel_'+d+'.png');
-          anchors[i] = sketch.loadImage('img/tv/anchor_'+d+'_body.png');
-          jaws[i] = sketch.loadImage('img/tv/anchor_'+d+'_jaw.png');
+          jaws[i] = sketch.loadImage('img/tv/channel_'+d+'_jaw.png');
         });
       };
 
@@ -905,7 +902,6 @@ jsPsych.plugins['source-choice'] = (function(){
         thought.loadPixels();
         backgrounds.forEach(function(d,i){
           backgrounds[i].loadPixels();
-          anchors[i].loadPixels();
           jaws[i].loadPixels();
         });
         agents.forEach(function(d,i){
