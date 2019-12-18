@@ -9,6 +9,7 @@
         <script language="javascript" src="libraries/jquery-3.4.1.min.js"></script>
         <script language="javascript" src="libraries/jstat.min.js"></script>
         <script language="javascript" src="jspsych/jspsych.js"></script>
+        <script language="javascript" src="jspsych/plugins/jspsych-external-html.js"></script>
         <script language="javascript" src="jspsych/plugins/jspsych-source-choice.js"></script>
         <script language="javascript" src="jspsych/plugins/jspsych-source-choice-training.js"></script>
         <script language="javascript" src="jspsych/plugins/jspsych-beast.js"></script>
@@ -19,10 +20,32 @@
     <body></body>
     <script>
 
-    timeline = []
+    var input_data = <%- input_data %>
+    var trial_id = input_data.trial_id
+    var cmpltnCd = makeCode(3)+'RtR' + makeCode(5) + '4z4'
+    jsPsych.data.addProperties({cmpltnCd: cmpltnCd,
+                                trial_id: trial_id});
 
-    // randomise anchor ids
-    var anchorOrder = jsPsych.randomization.shuffle(_.range(7));
+    var data = {};
+    var timeline = [];
+    var start_time;
+    var save_attempts = 0;
+    var saveTimeout = 1000;
+    var cmpltnCdEnd;
+    var dataUrl = '/data?trial_id=' + trial_id;
+
+    // consent
+
+    var consent = {
+      type: 'external-html',
+      url: '../views/consent.html',
+      check_fn: function(){
+        experiment_start_time = Date.now();
+        return true;
+      },
+      cont_btn: 'consent'
+    }
+
 
     var welcome = {
       type: 'instructions',
@@ -93,15 +116,20 @@
     var estimation_practice3 = {
       type: 'source-choice-training',
       rating_type: 'likelihood',
-      main_instructions: 'For example, how likely do you think Trump is to win re-election?? If you mouse over the scale below, it will reflect different ratings from "Very unlikely" to "Very likely". <b>Only click once you have made your decision.</b>',
+      main_instructions: 'For example, how likely do you think Trump is to win re-election? If you mouse over the scale below, it will reflect different ratings from "Very unlikely" to "Very likely". <b>Only click once you have made your decision.</b>',
       secondary_instructions: 'How confident are you about your decision? Again, mousing over the scale will reflect different ratings. Clicking on the scale will make your decision.'
     }
 
     var estimation_practice4 = {
       type: 'source-choice-training',
-      rating_type: 'morality',
+      rating_type: 'likelihood',
       main_instructions: 'Another example, how likely do you think it is that a Democrat would win as governor of your state in the next election? Mouse over the scale, and click when you\'ve made your decision.',
       secondary_instructions: 'How confident are you about your decision?'
+    }
+
+    var social_instructions = {
+      type: 'instructions',
+      pages: ['<img src=""></img>In addition, we\'ll show you what some other people think about these issues.']
     }
 
     var final_instructions = {
@@ -127,9 +155,9 @@
     //   blue: [5, 7, 14, 16],
     //   red: [2, 19],
     //   brown: [3, 18],
-    //   pink: [8, 9, 12],
+    //   pink: [9, 12],
     //   orange: [10, 11],
-    //   purple: [6, 13, 15]
+    //   purple: [6, 8, 13, 15]
     // }
 
     var channel_colors = {
@@ -137,7 +165,7 @@
       5: 'blue', 7: 'blue', 14: 'blue', 16: 'blue',
       2: 'red', 19: 'red',
       3: 'brown', 18: 'brown',
-      8: 'pink', 9: 'pink', 12: 'pink',
+      8: 'purple', 9: 'pink', 12: 'pink',
       10: 'orange', 11: 'orange',
       6: 'purple', 13: 'purple', 15: 'purple'
     }
@@ -252,7 +280,8 @@
       social_info_condition = 'random';
       conditional_instructions = "Click on each person's <b>TV</b>, which will shuffle through the local TV channels and select a <b>random</b> channel for them to watch.";
     } else {
-      social_info_condition = 'intentional';
+      // social_info_condition = 'intentional';
+      social_info_condition = 'random';
       conditional_instructions = "Click on each person's <b>remote control</b>, and they will turn on their most trusted local channel.";
     }
 
@@ -371,6 +400,99 @@
         data: {trial_no: 5}}
     ]
 
+    // biographic info
+
+    var bioData = {};
+
+    function checkResponses(){
+      //Check that all questions are answered, and that only numbers are used in responding to Age
+      var age = $('input[name=ageText]', '#biography').val();
+      var gender = $('input[name=genderRadio]:checked', '#biography').val();
+      var education = $('input[name=eduRadio]:checked', '#biography').val();
+      var language = $('input[name=languageRadio]:checked', '#biography').val();
+      var honesty = $('input[name=honestyRadio]:checked', '#biography').val();
+
+      var ageFail = true;
+      var genderFail = true;
+      var genderSelfDescribe = false;
+      var languageFail = true;
+      var eduFail = true;
+      var honestyFail = true;
+
+      if( age > 0 ){
+        ageFail = false;
+        $('#age>p').css('color', 'black');
+      } else {
+        $('#age>p').css('color', 'red');
+      }
+
+      if( gender == 'other' ){
+        genderSelfDescribe = true;
+        var descr = $('input[name=other_text]', '#biography').val().replace(/\s+/g, '');
+        if( descr.length > 0 ){
+          genderSelfDescribe = false;
+          gender = descr
+        }
+      }
+
+      if (typeof gender != 'undefined'){
+        genderFail = false;
+        $('#gender>p').css('color', 'black');
+      } else {
+        $('#gender>p').css('color', 'red');
+      }
+
+      if (education >= 0){
+        eduFail = false;
+        $('#education>p').css('color', 'black');
+      } else {
+        $('#education>p').css('color', 'red');
+      }
+
+      if( language >= 0 ){
+        languageFail = false;
+        $('#language>p').css('color', 'black');
+      } else {
+        $('#language>p').css('color', 'red');
+      }
+
+      if( honesty >= 0 ){
+        honestyFail = false;
+        $('#honesty>p').css('color', 'black');
+      } else {
+        $('#honesty>p').css('color', 'red');
+      }
+
+
+      if( genderFail || ageFail || languageFail || genderSelfDescribe || eduFail || honestyFail ){
+        var alertMessage = "Please check you've provided an answer to all questions in red.";
+        if( ageFail ){
+          alertMessage += " Check that you've only included numbers when giving your age. "
+        }
+        if( genderSelfDescribe ){
+          alertMessage += " If you've chosen to self-describe your gender, please fill in a value. "
+        }
+        alert(alertMessage);
+      } else {
+        bioData = {
+          age: age,
+          gender: gender,
+          language: language,
+          education: education,
+          honesty: honesty
+        };
+        return true;
+      }
+
+    };
+
+    var biographic = {
+      type: 'external-html',
+      url: '../views/biographic.html',
+      check_fn: checkResponses,
+      cont_btn: 'submit',
+    }
+
     // timeline.push(beast_instructions);
     // timeline.push(beast);
 
@@ -381,6 +503,8 @@
     // timeline.push(estimation_instructions2)
     // timeline.push(estimation_practice3)
     // timeline.push(estimation_practice4)
+
+    // timeline.push(social_instructions)
     // timeline.push(final_instructions)
 
     trial_order.forEach(function(d, i){
@@ -395,24 +519,90 @@
         }
       };
 
-      // var mayor = {
-      //   type: "source-choice",
-      //   choice_type: social_info_condition,
-      //   timeline: [mayor_settings[d]],
-      //   rating_type: 'likelihood',
-      // };
+      var mayor = {
+        type: "source-choice",
+        choice_type: social_info_condition,
+        timeline: [mayor_settings[d]],
+        rating_type: 'likelihood',
+      };
 
       timeline.push(moral)
       // timeline.push(mayor)
 
     })
 
-    console.log(timeline)
-
+    timeline.push(biographic);
 
     jsPsych.init({
-        timeline: timeline
-    })
+        default_iti: 500,
+        show_progress_bar: true,
+        exclusions: {
+          min_width: 800,
+          min_height: 600
+        },
+        timeline: timeline,
+        on_finish: function(){
+          save();
+        }
+    });
+
+    function save(){
+      if(save_attempts==0){
+        var endTime = Date.now();
+        var duration = endTime-startTime;
+        var interactionData = jsPsych.data.getInteractionData().json();
+        jsPsych.data.get().addToLast({duration: duration,
+                                      interactionData: interactionData,
+                                      //bio_data: bio_data
+                                    });
+        data.responses = jsPsych.data.get().json();
+        data.trial_id = trial_id;
+        data.cmpltnCd = cmpltnCd;
+        cmpltnCdEnd = cmpltnCd + trial_id;
+        console.log('    About to post survey output data...', data);
+      }
+      dataJSON = JSON.stringify(data);
+
+      $.ajax({
+         type: 'POST',
+         url: dataUrl,
+         data: dataJSON,
+         contentType: "application/json",
+         timeout: 3000,
+         success: function(request, status, error){
+           finish(cmpltnCdEnd+'_'+save_attempts)
+         },
+         error: function(request, status){
+           $('#jspsych-content').html("Please wait a few seconds while we save your responses...")
+           console.log('    Error posting data...', request, status)
+           if ( save_attempts < 5) {
+             save_attempts += 1;
+             saveTimeout += 500;
+             console.log("Trying again, attempt ", save_attempts)
+             setTimeout(function () {
+                save();
+                }, saveTimeout)
+           } else {
+             finish(cmpltnCdEnd+'_'+save_attempts);
+           }
+         }
+       });
+    }
+
+    function finish(cmpltnCd){
+      cmpltnCd +=  trial_id;
+      window.location.href = "/TyNFQbzAlF?gvmejG="+cmpltnCd;
+    }
+
+    function makeCode(len){
+      var text = "";
+      var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYabcdefghijklmnopqrstuvwxy0123456789";
+      for( var i=0; i < len; i++ ){
+        text += possible.charAt(Math.floor(Math.random() * possible.length));
+      }
+      return text;
+    };
+
 
     </script>
 </html>

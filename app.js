@@ -16,7 +16,7 @@ const express = require('express'),
   _ = require('lodash'),
   detect = require('browser-detect'),
   geoip = require('geoip-lite'),
-  // db = require(__dirname+'/controllers/db'),
+  db = require(__dirname+'/controllers/db'),
   tasks = require(__dirname+'/controllers/tasks'),
   responses = require(__dirname+'/controllers/responses'),
   {makeCode} = require('./helper/codeString.js');
@@ -34,7 +34,7 @@ app.use(
 );
 
 // --- MONGOOSE SETUP
-// db.connect(process.env.MONGODB_URI);
+db.connect(process.env.MONGODB_URI);
 
 // --- STATIC MIDDLEWARE
 app.use(express.static(__dirname + '/public'));
@@ -54,7 +54,7 @@ app.set('views', __dirname + '/public/views');
 
 // --- ERROR HANDLER
 function errorHandler(err){
-  console.log("Error in trial "+err.trialId+" ("+err.stage+"): ", err);
+  console.log("Error in trial "+err.trial_id+" ("+err.stage+"): ", err);
   next();
 }
 
@@ -65,7 +65,7 @@ app.get('/', (req, res, next) => {
     const workerId = req.query.workerId || '';
     const assignmentId = req.query.assignmentId || '';
     const hitId = req.query.hitId || '';
-    const trialId = makeCode(2)+'5'+makeCode(5)+'RtR'+makeCode(4)+'m'+makeCode(2);
+    const trial_id = makeCode(2)+'5'+makeCode(5)+'RtR'+makeCode(4)+'m'+makeCode(2);
     const browser = detect(req.headers['user-agent']);
     const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress || req.socket.remoteAddress || (req.connection.socket ? req.connection.socket.remoteAddress : null);
     let geo = {};
@@ -78,7 +78,7 @@ app.get('/', (req, res, next) => {
         "workerId": workerId,
         "hitId": hitId,
         "assignmentId": assignmentId,
-        "trialId": trialId,
+        "trial_id": trial_id,
         "sessionId": sessId,
         "studyName": studyName,
         "browser": browser,
@@ -89,14 +89,14 @@ app.get('/', (req, res, next) => {
     // Check browser not IE, and device not mobile
     let browserOk = true;
     if (browser) {
-      console.log(trialId, 'Detected browser...', browser);
+      console.log(trial_id, 'Detected browser...', browser);
       if (browser.name=='ie' || browser.mobile==true){
         browserOk = false;
       }
     }
 
     if(browserOk){
-      res.render('experiment.ejs', {inputData: JSON.stringify({trialId: trialId})});
+      res.render('experiment.ejs', {input_data: JSON.stringify({trial_id: trial_id})});
     } else {
       res.send('You seem to be viewing this either on a mobile device or with Internet Explorer. The instructions explicitly forbade those. Please just return the HIT.');
     }
@@ -105,35 +105,29 @@ app.get('/', (req, res, next) => {
 
 // --- SAVE TRIAL DATA
 
-app.post('/e3PlV5', (req, res, next) => {
+app.post('/data', (req, res, next) => {
 
   const data = req.body;
-  const sessionId = req.session.id;
-  const trialId = req.query.trialId || 'none';
-  console.log(trialId, 'Preparing to save trial data...');
+  const trial_id = req.query.trial_id || 'none';
+  console.log(trial_id, 'Preparing to save trial data...');
 
   responses.save({
-      sessionId: sessionId,
       trialData: data,
-      trialId: trialId,
+      trial_id: trial_id,
       studyName: studyName,
   })
   .then(res.status(200).end());
 });
 
-app.get('/x5JVJpXO2e', (req, res) => {
+app.get('/finish', (req, res) => {
   const sessId = req.session.id;
-  let code = req.query.gvmejG;
+  let code = req.query.token;
   if(code.length>=0){
     code = code + makeCode(3) + '5';
   } else {
     code = makeCode(10) + 'SZs';
   }
   res.render('finish.ejs', {completionCode: code});
-});
-
-app.get('/uwDone', (req, res) => {
-  res.render('finishUW.ejs');
 });
 
 // --- START THE SERVER

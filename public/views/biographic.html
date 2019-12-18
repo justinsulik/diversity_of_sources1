@@ -1,0 +1,38 @@
+<form id="biography" style="text-align:left">
+  Finally, here are some questions about you and your background.
+  <div id="age">
+    <p><b>Age:</b></p>
+      <input type="text" name="ageText">
+  </div>
+  <div id="gender">
+    <p><b>Gender:</b></p>
+    <input type="radio" name="genderRadio" value="male"> Male<br>
+    <input type="radio" name="genderRadio" value="female"> Female<br>
+    <input type="radio" name="genderRadio" value="na"> Prefer not to say<br>
+    <input type="radio" name="genderRadio" value="other"> Prefer to self-describe:<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="text" name="other_text">
+  </div>
+  <div id="education">
+    <p><b>Highest completed education level:</b></p>
+    <input type="radio" name="eduRadio" value="1"> Some high school<br>
+    <input type="radio" name="eduRadio" value="2"> High school diploma<br>
+    <input type="radio" name="eduRadio" value="3"> 2-year degree or diploma<br>
+    <input type="radio" name="eduRadio" value="4"> Bachelors degree or equivalent<br>
+    <input type="radio" name="eduRadio" value="5"> Masters degree or equivalent<br>
+    <input type="radio" name="eduRadio" value="6"> Doctorate or equivalent<br>
+    <input type="radio" name="eduRadio" value="0"> Prefer not to say<br>
+  </div>
+  <div id="language">
+    <p>Are you a <b>native speaker</b> of English?</p>
+    <input type="radio" name="languageRadio" value="0"> No<br>
+    <input type="radio" name="languageRadio" value="1"> Yes<br>
+  </div>
+  <div id="honesty">
+    <p>Did your answers to this HIT reflect your <b>genuine</b> beliefs?</p>
+    <input type="radio" name="honestyRadio" value="0"> No<br>
+    <input type="radio" name="honestyRadio" value="1"> Yes<br>
+  </div>
+  <div>
+    <br><button type="button" id='submit'>Submit</button>
+  </div>
+</form>

@@ -39,8 +39,8 @@ jsPsych.plugins['source-choice-training'] = (function(){
     // set up basic html for trial
 
     var css = '<style id="jspsych-source-choice-training-css">'+
-    '#mainSketchContainer {border: 1px solid black; position: relative;}'+
-    '.instructions {position: absolute; left: 500px; width: 360px; text-align: left; font-size: 15px}'+
+    '#mainSketchContainer {position: relative;}'+
+    '.instructions {position: absolute; left: 220px; width: 360px; text-align: left; font-size: 15px; text-align: center}'+
     '#instructions {margin-top: 30px;}'+
     '#instructions2 {margin-top: 260px;}'+
     '</style>';
@@ -120,13 +120,13 @@ jsPsych.plugins['source-choice-training'] = (function(){
 
       function Rating(type){
         this.type = type;
-        this.x = 500;
+        this.x = 250;
         if(this.type == 'likelihood'){
           this.y = 200;
           this.labels = ['Very unlikely', 'Very likely'];
         } else if (this.type == 'morality'){
           this.y = 200;
-          this.labels = ['Completely unacceptable', 'Completely acceptable'];
+          this.labels = ['Morally bad', 'Morally good'];
         } else {
           this.y = 350;
           this.labels = ['Very unsure', 'Very sure'];
@@ -297,7 +297,7 @@ jsPsych.plugins['source-choice-training'] = (function(){
         sketch.background(255);
         estimate.show();
         confidence.show();
-        sketch.image(icon, 600, 450, 100, 100);
+        sketch.image(icon, 350, 450, 100, 100);
       };
 
       sketch.mousePressed = function(e){

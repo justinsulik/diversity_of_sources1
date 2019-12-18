@@ -384,7 +384,8 @@ jsPsych.plugins['source-choice'] = (function(){
 
     function generateInfo(){
       var range = pickRange();
-      var random_array = randomUniform(range);
+      // var random_array = randomUniform(range);
+      var random_array = randomUniform([0.2, 0.8]);
       var final_array = splitLeaders(random_array);
       return final_array;
     }
@@ -465,7 +466,7 @@ jsPsych.plugins['source-choice'] = (function(){
           this.labels = ['Very unlikely', 'Very likely'];
         } else if (this.type == 'morality'){
           this.y = 200;
-          this.labels = ['Completely unacceptable', 'Completely acceptable'];
+          this.labels = ['Morally bad', 'Morally good'];
         } else {
           this.y = 350;
           this.labels = ['Very unsure', 'Very sure'];
