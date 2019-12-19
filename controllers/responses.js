@@ -8,14 +8,14 @@ const express = require('express'),
 exports.save = function (data) {
   var stage = 'Saving trial data in db...';
   return new Promise((resolve, reject) => {
-    console.log(data.trialId, stage);
+    console.log(data.trial_id, stage);
 
     Response.create(data, (err, result) => {
       if (err){
-        err.trialId = data.trialId;
+        err.trial_id = data.trial_id;
         reject(err);
       } else {
-        console.log(data.trialId, 'Data saved!');
+        console.log(data.trial_id, 'Data saved!');
         resolve(data);
       }
     });

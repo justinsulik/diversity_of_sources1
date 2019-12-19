@@ -29,7 +29,7 @@
 
     var data = {};
     var timeline = [];
-    var start_time;
+    var experiment_start_time;
     var save_attempts = 0;
     var saveTimeout = 1000;
     var cmpltnCdEnd;
@@ -497,20 +497,20 @@
       columns: 80,
       name: 'feedback'}]
     }
-    //
-    // timeline.push(consent);
-    // timeline.push(beast_instructions);
-    // timeline.push(beast);
-    //
-    // timeline.push(estimation_instructions1)
-    // timeline.push(estimation_practice1)
-    // timeline.push(estimation_practice2)
-    //
-    // timeline.push(estimation_instructions2)
-    // timeline.push(estimation_practice3)
-    // timeline.push(estimation_practice4)
-    //
-    // timeline.push(final_instructions)
+
+    timeline.push(consent);
+    timeline.push(beast_instructions);
+    timeline.push(beast);
+
+    timeline.push(estimation_instructions1)
+    timeline.push(estimation_practice1)
+    timeline.push(estimation_practice2)
+
+    timeline.push(estimation_instructions2)
+    timeline.push(estimation_practice3)
+    timeline.push(estimation_practice4)
+
+    timeline.push(final_instructions)
 
     var ordinals = {1: 'First', 2: 'Second', 3: 'Finally'};
     var towns = ['Greenville', 'Kingston', 'Fairfield']
@@ -540,14 +540,14 @@
         timeline: [mayor_settings[d]],
         rating_type: 'likelihood',
       };
-
-      // timeline.push(intro)
-      // timeline.push(moral)
-      // timeline.push(mayor)
+      //
+      timeline.push(intro)
+      timeline.push(moral)
+      timeline.push(mayor)
 
     })
 
-    // timeline.push(biographic);
+    timeline.push(biographic);
 
     timeline.push(feedback);
 
@@ -567,8 +567,8 @@
 
     function save(){
       if(save_attempts==0){
-        var endTime = Date.now();
-        var duration = endTime-start_time;
+        var experiment_end_time = Date.now();
+        var duration = experiment_end_time - experiment_start_time;
         var interactionData = jsPsych.data.getInteractionData().json();
         jsPsych.data.get().addToLast({duration: duration,
                                       interactionData: interactionData,

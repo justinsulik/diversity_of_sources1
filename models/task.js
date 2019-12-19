@@ -4,7 +4,7 @@ const taskSchema = new mongoose.Schema({
   workerId: String,
   hitId: String,
   assignmentId: String,
-  trialId: String,
+  trial_id: String,
   sessionId: String,
   created: { type: Date, default: Date.now },
   studyName: String,
