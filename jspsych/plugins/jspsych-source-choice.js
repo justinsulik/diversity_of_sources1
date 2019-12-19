@@ -52,6 +52,11 @@ jsPsych.plugins['source-choice'] = (function(){
         default: {scenario: 'blah'},
         description: 'instructions, with each stage of the trial as a key. Stages = scenario, priorEstimate, tvStart, tvsOn, socInfoCheck, posteriorEstimate'
       },
+      labels: {
+        type: jsPsych.plugins.parameterType.STRING,
+        array: true,
+        description: 'Optional labels as anchors for the slider'
+      }
     }
   };
 
@@ -469,6 +474,10 @@ jsPsych.plugins['source-choice'] = (function(){
         } else {
           this.y = 350;
           this.labels = ['Very unsure', 'Very sure'];
+        }
+        // override the above defaults if given
+        if(trial.labels){
+          this.labels = trial.labels;
         }
         this.width = 300;
         this.yOffset = 20;

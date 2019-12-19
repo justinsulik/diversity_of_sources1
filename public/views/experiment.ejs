@@ -37,6 +37,7 @@
 
     var landscapes = ['img/landscape/scene1.png','img/landscape/scene2.png','img/landscape/scene3.png'];
     var landscapes_shuffled = jsPsych.randomization.shuffle(landscapes);
+    var animals = ['img/beast/bear.png','img/beast/hamster.png','img/beast/kangaroo.png','img/beast/koala.png','img/beast/lion.png','img/beast/rabbit.png']
 
     // set up condition
 
@@ -346,11 +347,11 @@
 
     var moral_instructions_weed = {
       scenario: "The people of Greenville have been thinking about whether cannabis should be decriminalized.",
-      priorEstimate: 'In general, how do you view <b>recreational cannabis use</b>? Rate the acceptability on the scale below (click scale to confirm).',
+      priorEstimate: 'In general, how do you view <b>decriminalization of cannabis</b>? Rate the acceptability on the scale below (click scale to confirm).',
       tvStart: "In Greenville, there has been a lot of discussion about this issue on TV recently. " + conditional_instructions,
       tvsOn: "The people of Greenville have each decided how they feel about recreational cannabis use. Click 'next' to see their beliefs about this issue.",
       socInfoCheck: 'Click on the <b>person</b> that views this most favorably.',
-      posteriorEstimate: "Have a look at people's opinions. How acceptable do you think recreational cannabis use is? Rate acceptability on the scale below (click scale to confirm)."
+      posteriorEstimate: "Have a look at people's opinions. How acceptable do you think decriminalization of cannabis use is? Rate acceptability on the scale below (click scale to confirm)."
     }
 
     var moral_instructions_guns = {
@@ -377,18 +378,21 @@
 
     var moral_settings = [
       {instructions: moral_instructions_weed,
+        labels: ['Decriminalization\nbad', 'Decriminalization\ngood'],
         agreement: moral_agreements[0],
         diversity: moral_diversity[0],
         agent_ids: agents.slice(15,20),
         channel_ids: groups[0],
         data: {trial_no: 3}},
       {instructions: moral_instructions_guns,
+        labels: ['Tougher checks\nbad', 'Tougher checks\ngood'],
         agreement: moral_agreements[1],
         diversity: moral_diversity[1],
         agent_ids: agents.slice(20,25),
         channel_ids: groups[1],
         data: {trial_no: 4}},
       {instructions: moral_instructions_immigration,
+        labels: ['Stricter policies\nbad', 'Stricter policies\ngood'],
         agreement: moral_agreements[2],
         diversity: moral_diversity[2],
         agent_ids: agents.slice(25,30),
@@ -498,6 +502,9 @@
       name: 'feedback'}]
     }
 
+
+    // timeline
+
     timeline.push(consent);
     timeline.push(beast_instructions);
     timeline.push(beast);
@@ -552,7 +559,7 @@
     timeline.push(feedback);
 
     jsPsych.init({
-        preload_images: landscapes_shuffled,
+        preload_images: landscapes_shuffled.concat(animals),
         default_iti: 500,
         show_progress_bar: true,
         exclusions: {
@@ -621,7 +628,6 @@
       }
       return text;
     };
-
 
     </script>
 </html>
