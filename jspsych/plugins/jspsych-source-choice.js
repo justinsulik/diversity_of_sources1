@@ -384,8 +384,7 @@ jsPsych.plugins['source-choice'] = (function(){
 
     function generateInfo(){
       var range = pickRange();
-      // var random_array = randomUniform(range);
-      var random_array = randomUniform([0.2, 0.8]);
+      var random_array = randomUniform(range);
       var final_array = splitLeaders(random_array);
       return final_array;
     }
@@ -427,7 +426,7 @@ jsPsych.plugins['source-choice'] = (function(){
       var sketchHeight = 600;
       var agentSize = 100;
       var thoughtSize = 100;
-      var topMargin = 50;
+      var topMargin = 40;
       var passes = 4;
       var displaySize = {x: 141, y: 88};
       var displayOffset = {x: 10, y: 31};
@@ -834,7 +833,7 @@ jsPsych.plugins['source-choice'] = (function(){
 
       function Remote(agentNumber){
         this.index = agentNumber;
-        this.y = agentNumber*((sketchHeight-topMargin)/agentCount) + 1.2*agentSize;
+        this.y = agentNumber*((sketchHeight-topMargin)/agentCount) + agentSize + 12;
         this.x = 150 + 0.85*agentSize;
         this.on = false;
 

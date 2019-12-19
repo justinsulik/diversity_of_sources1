@@ -14,6 +14,7 @@
         <script language="javascript" src="jspsych/plugins/jspsych-source-choice-training.js"></script>
         <script language="javascript" src="jspsych/plugins/jspsych-beast.js"></script>
         <script language="javascript" src="jspsych/plugins/jspsych-instructions.js"></script>
+        <script language="javascript" src="jspsych/plugins/jspsych-survey-text.js"></script>
         <link href="jspsych/css/jspsych.css" rel="stylesheet" type="text/css"></link>
         <link href="css/experiment.css" rel="stylesheet" type="text/css"></link>
     </head>
@@ -33,6 +34,21 @@
     var saveTimeout = 1000;
     var cmpltnCdEnd;
     var dataUrl = '/data?trial_id=' + trial_id;
+
+    var landscapes = ['img/landscape/scene1.png','img/landscape/scene2.png','img/landscape/scene3.png'];
+    var landscapes_shuffled = jsPsych.randomization.shuffle(landscapes);
+
+    // set up condition
+
+    var social_info_condition;
+    var conditional_instructions;
+    if(Math.random()<0.5){
+      social_info_condition = 'random';
+      conditional_instructions = "Click on each person's <b>TV</b>, which will shuffle through the local TV stations and select a <b>random</b> station for them to watch.";
+    } else {
+      social_info_condition = 'intentional';
+      conditional_instructions = "Click on each person's <b>remote control</b>, and they will turn on their most trusted local news station.";
+    }
 
     // consent
 
@@ -60,7 +76,8 @@
       "Once you've made a guess, we'll show you the guess of another Turker, who previously did this task. "+
       "Sometimes two heads are better than one! You can then choose to stick with your original estimate, or to update it in light of the other Turker's opinion.<br><br>"+
       "Since we want you to estimate (rather than count), there is a time limit of 15 seconds for each trial, "+
-      "meaning that even if you take a screen cap before the image disappears, you won't have time to count the animals before your time is up."],
+      "meaning that even if you take a screen cap before the image disappears, you won't have time to count the animals before your time is up.",
+      "You can just hit ENTER to submit your response, though we have also included a submit button for those who want it."],
       show_clickable_nav: true
     }
 
@@ -88,7 +105,7 @@
     var estimation_practice1 = {
       type: 'source-choice-training',
       rating_type: 'morality',
-      main_instructions: 'For example, how acceptable do you think <b>spanking children</b> is? If you mouse over the scale below, it will reflect different ratings from "completely unacceptable" to "completely acceptable". <b>Only click once you have made your decision.</b>',
+      main_instructions: 'For example, how acceptable do you think <b>spanking children</b> is? If you mouse over the scale below, it will reflect different ratings from "morally bad" to "morally good". <b>Only click once you have made your decision.</b>',
       secondary_instructions: 'How confident are you about your decision? Again, mousing over the scale will reflect different ratings. Clicking on the scale will make your decision.'
     }
 
@@ -127,14 +144,13 @@
       secondary_instructions: 'How confident are you about your decision?'
     }
 
-    var social_instructions = {
-      type: 'instructions',
-      pages: ['<img src=""></img>In addition, we\'ll show you what some other people think about these issues.']
-    }
-
     var final_instructions = {
       type: 'instructions',
-      pages: ['Now that you\'ve been shown how to use the scales, we will begin the task. We will visit three small American towns, one after the other.<br><br>'+
+      pages: ['<img src="img/soc_info.png" style="height:400px; float: left"></img>'+
+      'In addition, we\'ll show you what some other people think about these issues. They will be using the exact same scale as you. '+
+      'If you\'ve just rated how likely something is, and are then given other people\'s opinions like the image here, then their thought bubbles reflect how likely they think the same thing is.<br><br>'+
+      'So the one with the highest estimate is the guy at the top with the orange shirt, and the one with the lowest estimate is the one in the middle with the red shirt and moustache.',
+      'Now that you\'ve been shown how to use the scales, we will begin the task. We will visit three small American towns, one after the other.<br><br>'+
       'For each town, you will make one judgment about morality, and one judgment about the likelihood of an outcome in a local election. '+
       'In both cases, you will also be shown the opinions of random samples of the local population.<br><br>'+
       'You can assume that each sample of people is typical of the area. '+
@@ -272,29 +288,9 @@
       pages: ['In the next task, we will be telling you about some small towns in the US that are having elections for mayor']
     }
 
-    // set up condition
-
-    var social_info_condition;
-    var conditional_instructions;
-    if(Math.random()<0.5){
-      social_info_condition = 'random';
-      conditional_instructions = "Click on each person's <b>TV</b>, which will shuffle through the local TV channels and select a <b>random</b> channel for them to watch.";
-    } else {
-      // social_info_condition = 'intentional';
-      social_info_condition = 'random';
-      conditional_instructions = "Click on each person's <b>remote control</b>, and they will turn on their most trusted local channel.";
-    }
-
     // set up scenarios
 
     var trial_order = jsPsych.randomization.shuffle(_.range(3));
-    // var mayor_agreement = _.map(trial_order, function(d){
-    //   if(d==1){
-    //     return 'agree'
-    //   } else {
-    //     return 'disagree'
-    //   }
-    // })
 
     var mayor_instructions_left = {
       scenario: "Bob Smith is one of two candidates running for mayor of Greenville. His platform involves increasing the town's education budget, building more bicycle paths, and instituting equal pay.",
@@ -402,7 +398,7 @@
 
     // biographic info
 
-    var bioData = {};
+    var bio_data = {};
 
     function checkResponses(){
       //Check that all questions are answered, and that only numbers are used in responding to Age
@@ -474,7 +470,7 @@
         }
         alert(alertMessage);
       } else {
-        bioData = {
+        bio_data = {
           age: age,
           gender: gender,
           language: language,
@@ -493,9 +489,19 @@
       cont_btn: 'submit',
     }
 
+    var feedback = {
+      type: 'survey-text',
+      questions: [{prompt: 'Any feedback for us? Leave blank if not.',
+      placeholder: '',
+      rows: 5,
+      columns: 80,
+      name: 'feedback'}]
+    }
+    //
+    // timeline.push(consent);
     // timeline.push(beast_instructions);
     // timeline.push(beast);
-
+    //
     // timeline.push(estimation_instructions1)
     // timeline.push(estimation_practice1)
     // timeline.push(estimation_practice2)
@@ -503,11 +509,20 @@
     // timeline.push(estimation_instructions2)
     // timeline.push(estimation_practice3)
     // timeline.push(estimation_practice4)
-
-    // timeline.push(social_instructions)
+    //
     // timeline.push(final_instructions)
 
+    var ordinals = {1: 'First', 2: 'Second', 3: 'Finally'};
+    var towns = ['Greenville', 'Kingston', 'Fairfield']
+
     trial_order.forEach(function(d, i){
+
+      var ordinal = ordinals[i+1];
+      var intro = {
+        type: 'instructions',
+        pages: [ordinal + ', we visit the town of '+towns[d]+'.<br><br><img src="'+landscapes_shuffled[d]+'"></img>'],
+        show_clickable_nav: true,
+      }
 
       var moral = {
         type: "source-choice",
@@ -526,19 +541,23 @@
         rating_type: 'likelihood',
       };
 
-      timeline.push(moral)
+      // timeline.push(intro)
+      // timeline.push(moral)
       // timeline.push(mayor)
 
     })
 
-    timeline.push(biographic);
+    // timeline.push(biographic);
+
+    timeline.push(feedback);
 
     jsPsych.init({
+        preload_images: landscapes_shuffled,
         default_iti: 500,
         show_progress_bar: true,
         exclusions: {
           min_width: 800,
-          min_height: 600
+          min_height: 500
         },
         timeline: timeline,
         on_finish: function(){
@@ -549,11 +568,11 @@
     function save(){
       if(save_attempts==0){
         var endTime = Date.now();
-        var duration = endTime-startTime;
+        var duration = endTime-start_time;
         var interactionData = jsPsych.data.getInteractionData().json();
         jsPsych.data.get().addToLast({duration: duration,
                                       interactionData: interactionData,
-                                      //bio_data: bio_data
+                                      bio_data: bio_data
                                     });
         data.responses = jsPsych.data.get().json();
         data.trial_id = trial_id;
@@ -591,7 +610,7 @@
 
     function finish(cmpltnCd){
       cmpltnCd +=  trial_id;
-      window.location.href = "/TyNFQbzAlF?gvmejG="+cmpltnCd;
+      window.location.href = "/finish?token="+cmpltnCd;
     }
 
     function makeCode(len){

@@ -30,7 +30,7 @@ jsPsych.plugins["beast"] = (function() {
       },
       responseTime: {
         type: jsPsych.plugins.parameterType.INT,
-        default: 15000,
+        default: 1500000,
         description: "How long participants have to respond"
       }
     }
@@ -55,7 +55,7 @@ jsPsych.plugins["beast"] = (function() {
 
     // trial parameters
     var trial_count = 0;
-    var sketchHeight = 500;
+    var sketchHeight = 480;
     var sketchWidth = 800;
     var buffer = 30;
     var potentialPositions = {x: 25, y: 15};
@@ -65,7 +65,7 @@ jsPsych.plugins["beast"] = (function() {
 
     var css = '<style>';
     css += '.low {height: 50px; margin: auto;}';
-    css += '#instructions-container {width: '+sketchWidth+'px}';
+    css += '#instructions-container {width: '+sketchWidth+'px; font-size: 12px}';
     css += '#beast-container {height: '+sketchHeight+'px; width: '+sketchWidth+'px; border: 1px solid black}';
     css += '.response {margin-right: 10px}';
     css += '</style>';
