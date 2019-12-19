@@ -30,7 +30,7 @@ jsPsych.plugins["beast"] = (function() {
       },
       responseTime: {
         type: jsPsych.plugins.parameterType.INT,
-        default: 1500000,
+        default: 15000,
         description: "How long participants have to respond"
       }
     }
