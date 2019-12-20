@@ -470,15 +470,17 @@ jsPsych.plugins['source-choice'] = (function(){
           this.labels = ['Very unlikely', 'Very likely'];
         } else if (this.type == 'morality'){
           this.y = 200;
-          this.labels = ['Morally bad', 'Morally good'];
+          if(trial.labels){
+            this.labels = trial.labels;
+          } else {
+            this.labels = ['Morally bad', 'Morally good'];
+          }
         } else {
           this.y = 350;
           this.labels = ['Very unsure', 'Very sure'];
         }
         // override the above defaults if given
-        if(trial.labels){
-          this.labels = trial.labels;
-        }
+
         this.width = 300;
         this.yOffset = 20;
         this.proportion = null;
