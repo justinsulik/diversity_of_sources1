@@ -165,6 +165,12 @@ jsPsych.plugins["beast"] = (function() {
       }
       var delta = _.sample([0.16, 0.18, 0.20, 0.22, 0.24]);
       social_info = Math.floor((1+direction*delta)*response);
+      if(social_info < 50){
+        social_info = 50;
+      }
+      if(social_info > 130){
+        social_info = 130;
+      }
       trial_data.social = social_info;
       plural = getPlurals(animal);
       $('#instructions-container').html('You guessed <b>'+response+'</b>. Previously, another Turker guessed <b>'+ social_info + '</b>. You can stick with your initial guess or change it. How many ' + plural + ' do you think there were?');
