@@ -43,10 +43,10 @@ jsPsych.plugins["beast"] = (function() {
     };
 
     // trial parameters
-    var sketchHeight = 480;
+    var sketchHeight = 440;
     var sketchWidth = 800;
     var buffer = 30;
-    var potentialPositions = {x: 25, y: 15};
+    var potentialPositions = {x: 25, y: 10};
     var stage = 'initial';
 
     // set up html
