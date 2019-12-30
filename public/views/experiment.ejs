@@ -37,7 +37,6 @@
 
     var landscapes = ['img/landscape/scene1.png','img/landscape/scene2.png','img/landscape/scene3.png'];
     var landscapes_shuffled = jsPsych.randomization.shuffle(landscapes);
-    var animals = ['img/beast/bear.png','img/beast/hamster.png','img/beast/kangaroo.png','img/beast/koala.png','img/beast/lion.png','img/beast/rabbit.png']
 
     // set up condition
 
@@ -83,9 +82,19 @@
       show_clickable_nav: true
     }
 
+    var animals = ['bear', 'hamster', 'kangaroo', 'koala', 'lion'];
+    var animalImgs = _.map(animals, function(animal){
+      return 'img/beast/'+animal+'.png'
+    })
+    var beastCounts = [98, 78, 59, 74, 69];
+    var beastParams = _.map(jsPsych.randomization.shuffle(_.range(animals.length)), function(i){
+      return {animal: animals[i], count: beastCounts[i]}
+    })
+
+
     var beast = {
       type: 'beast',
-      animals: ['bear', 'kangaroo', 'koala', 'lion', 'rabbit'],
+      timeline: beastParams
     }
 
     var estimation_instructions1 = {
@@ -149,10 +158,10 @@
     var final_instructions = {
       type: 'instructions',
       pages: ['<img src="img/soc_info.png" style="height:400px; float: left"></img>'+
-      'In addition, we\'ll show you what some other people think about these issues. They will be using the exact same scale as you. '+
+      'In addition, we\'ll give you information about what these characters think. They will be using the exact same scale as you. '+
       'If you\'ve just rated how likely something is, and are then given other people\'s opinions like the image here, then their thought bubbles reflect how likely they think the same thing is.<br><br>'+
       'So the one with the highest estimate is the guy at the top with the orange shirt, and the one with the lowest estimate is the one in the middle with the red shirt and moustache.',
-      'Now that you\'ve been shown how to use the scales, we will begin the task. We will visit three small American towns, one after the other.<br><br>'+
+      'Now that you\'ve been shown how to use the scales, we will begin the task. Imagine that we are visiting three small American towns, one after the other.<br><br>'+
       'For each town, you will make one judgment about morality, and one judgment about the likelihood of an outcome in a local election. '+
       'In both cases, you will also be shown the opinions of random samples of the local population.<br><br>'+
       'You can assume that each sample of people is typical of the area. '+
@@ -506,8 +515,8 @@
 
     // timeline
 
-    timeline.push(consent);
-    timeline.push(beast_instructions);
+    // timeline.push(consent);
+    // timeline.push(beast_instructions);
     timeline.push(beast);
 
     timeline.push(estimation_instructions1)
@@ -560,7 +569,7 @@
     timeline.push(feedback);
 
     jsPsych.init({
-        preload_images: landscapes_shuffled.concat(animals),
+        preload_images: landscapes_shuffled.concat(animalImgs),
         default_iti: 500,
         show_progress_bar: true,
         exclusions: {

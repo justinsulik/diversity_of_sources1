@@ -9,19 +9,13 @@ jsPsych.plugins["beast"] = (function() {
   plugin.info = {
     name: "beast",
     parameters: {
-      trials: {
-        type: jsPsych.plugins.parameterType.INT, // BOOL, STRING, INT, FLOAT, FUNCTION, KEYCODE, SELECT, HTML_STRING, IMAGE, AUDIO, VIDEO, OBJECT, COMPLEX
-        default: 5
-      },
-      counts: {
+      count: {
         type: jsPsych.plugins.parameterType.INT,
-        array: true,
-        default: [98, 78, 59, 74, 69]
+        default: null
       },
-      animals: {
+      animal: {
         type: jsPsych.plugins.parameterType.STRING,
-        array: true,
-        default: ['bear', 'hamster', 'kangaroo', 'koala', 'lion', 'rabbit']
+        default: null
       },
       displayTime: {
         type: jsPsych.plugins.parameterType.INT,
@@ -38,23 +32,17 @@ jsPsych.plugins["beast"] = (function() {
 
   plugin.trial = function(display_element, trial) {
 
-    //shuffle orders
-    // console.log(trial.animals)
-    var animals = jsPsych.randomization.shuffle(trial.animals);
-    var counts = jsPsych.randomization.shuffle(trial.counts);
-
     plurals = {'walrus': 'walruses', 'fox': 'foxes'};
 
     // data saving
     var trial_data = {
-      trials: trial.trials,
-      counts: counts,
-      animals: animals,
-      responses: [],
+      count: trial.count,
+      animal: trial.animal,
+      initial: 'NA',
+      rt_initial: 'NA'
     };
 
     // trial parameters
-    var trial_count = 0;
     var sketchHeight = 480;
     var sketchWidth = 800;
     var buffer = 30;
@@ -65,7 +53,7 @@ jsPsych.plugins["beast"] = (function() {
 
     var css = '<style>';
     css += '.low {height: 50px; margin: auto;}';
-    css += '#instructions-container {width: '+sketchWidth+'px; font-size: 12px}';
+    css += '#instructions-container {width: '+sketchWidth+'px; font-size: 15px}';
     css += '#beast-container {height: '+sketchHeight+'px; width: '+sketchWidth+'px; border: 1px solid black}';
     css += '.response {margin-right: 10px}';
     css += '</style>';
@@ -75,9 +63,9 @@ jsPsych.plugins["beast"] = (function() {
     display_element.innerHTML = css + html;
 
     // trial vars
-    var animalImgs = {};
+    var animal = trial.animal;
+    var animalImg;
     var animalPositions;
-    var animal;
     var count;
     var display_start_time;
     var response_time;
@@ -98,8 +86,7 @@ jsPsych.plugins["beast"] = (function() {
     function displayAnimals(){
       display_start_time = Date.now();
       animalPositions = [];
-      animal = animals[trial_count];
-      count = counts[trial_count];
+      count = trial.count;
       plural = getPlurals(animal);
       $('#instructions-container').html('How many ' + plural + '?');
       $('#response-container').html('<input id="'+stage+'-response" class="response" type="text"></input><button id="submit">Submit</button>');
@@ -115,17 +102,13 @@ jsPsych.plugins["beast"] = (function() {
     var beast_sketch = new p5(function( sketch ) {
 
       sketch.preload = function(){
-        animals.forEach(function(animal){
-          animalImgs[animal]= sketch.loadImage('img/beast/'+animal+'.png');
-        });
+          animalImg = sketch.loadImage('img/beast/'+animal+'.png');
       };
 
       sketch.setup = function(){
         sketch.createCanvas(sketchWidth, sketchHeight);
         sketch.frameRate(10);
-        animals.forEach(function(animal){
-          animalImgs[animal].loadPixels();
-        });
+        animalImg.loadPixels();
         displayAnimals();
       };
 
@@ -134,7 +117,7 @@ jsPsych.plugins["beast"] = (function() {
         var time_on_screen = Date.now() - display_start_time;
         if(time_on_screen < trial.displayTime & stage == 'initial'){
           animalPositions.forEach(function(position){
-            sketch.image(animalImgs[animal], position.x, position.y, 30, 30);
+            sketch.image(animalImg, position.x, position.y, 30, 30);
           });
         }
         if(time_on_screen > trial.responseTime){
@@ -163,10 +146,10 @@ jsPsych.plugins["beast"] = (function() {
 
     function timeOut(){
       var response = $('.response').val();
-      saveResponse('timeout_'+response, stage);
+      trial_data.rt_final = 'NA';
+      trial_data.final = 'timeout_'+response;
       alert("You didn't answer within the 15 second time limit. You're meant to just estimate the number of animals, not count them one by one.");
-
-      advanceTrial();
+      finish_trial();
     }
 
     function socialStage(response){
@@ -182,25 +165,11 @@ jsPsych.plugins["beast"] = (function() {
       }
       var delta = _.sample([0.16, 0.18, 0.20, 0.22, 0.24]);
       social_info = Math.floor((1+direction*delta)*response);
+      trial_data.social = social_info;
       plural = getPlurals(animal);
       $('#instructions-container').html('You guessed <b>'+response+'</b>. Previously, another Turker guessed <b>'+ social_info + '</b>. You can stick with your initial guess or change it. How many ' + plural + ' do you think there were?');
       $('#response-container').html('<input id="'+stage+'-response" class="response" type="text"></input><button id="submit">Submit</button>');
       $('#social-response').focus();
-    }
-
-    function advanceTrial(){
-      if(trial_count < animals.length-1){
-        stage = 'initial';
-        trial_count += 1;
-        displayAnimals();
-      } else {
-        finish_trial();
-      }
-    }
-
-    function saveResponse(response,stage,social='NA'){
-      var rt = Date.now() - display_start_time;
-      trial_data.responses.push({count: count, response: response, animal: animal, stage: stage, social: social, rt: rt});
     }
 
     function getResponse(){
@@ -208,13 +177,14 @@ jsPsych.plugins["beast"] = (function() {
       var re = /^ *\d+ *$/;
       if(re.test(response)){
         if(response >= 50 & response <= 130){
-
           if(stage == 'initial'){
-            saveResponse(response,stage);
+            trial_data.initial = response;
+            trial_data.rt_initial = Date.now() - display_start_time;
             socialStage(response);
           } else {
-            advanceTrial();
-            saveResponse(response,stage,social_info);
+            trial_data.final = response;
+            trial_data.rt_final = Date.now() - display_start_time;
+            finish_trial();
           }
         } else {
           alert("There are between 50 and 130 animals. Please enter a number in that rage.");
@@ -235,7 +205,6 @@ jsPsych.plugins["beast"] = (function() {
     }
 
     $( document ).ready(function() {
-      // trial_start = Date.now(); // tracking each separate trial
       trial_data.task_start_time = Date.now(); // tracking overall time
     });
 
