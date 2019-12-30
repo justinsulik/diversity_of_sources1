@@ -18,7 +18,17 @@
         <link href="jspsych/css/jspsych.css" rel="stylesheet" type="text/css"></link>
         <link href="css/experiment.css" rel="stylesheet" type="text/css"></link>
     </head>
-    <body></body>
+    <body>
+      <!-- preloading images that will be used in instructions (and thus not preloaded by jspsych) -->
+      <div style="display:none;">
+        <img src="img/landscape/scene1.png" width="1" height="1" border="0" alt="">
+        <img src="img/landscape/scene2.png" width="1" height="1" border="0" alt="">
+        <img src="img/landscape/scene3.png" width="1" height="1" border="0" alt="">
+        <img src="img/soc_info.png" width="1" height="1" border="0" alt="">
+        <img src="img/icons/moral.png" width="1" height="1" border="0" alt="">
+        <img src="img/icons/vote.png" width="1" height="1" border="0" alt="">
+      </div>
+    </body>
     <script>
 
     var input_data = <%- input_data %>
@@ -515,17 +525,17 @@
 
     // timeline
 
-    timeline.push(consent);
-    timeline.push(beast_instructions);
-    timeline.push(beast);
+    // timeline.push(consent);
+    // timeline.push(beast_instructions);
+    // timeline.push(beast);
 
     timeline.push(estimation_instructions1)
-    timeline.push(estimation_practice1)
-    timeline.push(estimation_practice2)
+    // timeline.push(estimation_practice1)
+    // timeline.push(estimation_practice2)
 
     timeline.push(estimation_instructions2)
-    timeline.push(estimation_practice3)
-    timeline.push(estimation_practice4)
+    // timeline.push(estimation_practice3)
+    // timeline.push(estimation_practice4)
 
     timeline.push(final_instructions)
 
@@ -559,8 +569,8 @@
       };
       //
       timeline.push(intro)
-      timeline.push(moral)
-      timeline.push(mayor)
+      // timeline.push(moral)
+      // timeline.push(mayor)
 
     })
 
