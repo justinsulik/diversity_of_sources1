@@ -19,6 +19,10 @@ jsPsych.plugins['source-choice-training'] = (function(){
         default: null,
         description: 'Instructions for likelihood/acceptability rating.'
       },
+      cutoffs: {
+        type: jsPsych.plugins.parameterType.OBJECT,
+        default: {}
+      },
       secondary_instructions: {
         type: jsPsych.plugins.parameterType.STRING,
         pretty_name: 'Secondary instructions',
@@ -66,7 +70,7 @@ jsPsych.plugins['source-choice-training'] = (function(){
     }
 
 
-    var trial_data = {rts: {}};
+    var trial_data = {rts: {}, bad_responses: []};
     var estimate;
     var confidence;
     var displays;
@@ -92,7 +96,7 @@ jsPsych.plugins['source-choice-training'] = (function(){
       }
     }
 
-    function saveTime(trial_stage, time_now){
+    function saveTime(trial_state, time_now){
 
     }
 /*
@@ -241,20 +245,51 @@ jsPsych.plugins['source-choice-training'] = (function(){
         };
 
         this.clicked = function(){
+          var response_ok = true;
           if(this.over()){
-            if(!trial_data[trial_state]){
-              trial_data[trial_state] =  Math.round(this.proportion*100)/100;
-            }
-            if(!trial_data.rts[trial_state]){
-              var click_time = Date.now();
-              trial_data.rts[trial_state] = click_time - start_time;
-            }
-            if(trial_state == 'initial'){
-              trial_state = 'confidence';
-              updateInstructions();
+            if(this.checkResponse()){
+              if(!trial_data[trial_state]){
+                trial_data[trial_state] =  Math.round(this.proportion*100)/100;
+              }
+              if(!trial_data.rts[trial_state]){
+                var click_time = Date.now();
+                trial_data.rts[trial_state] = click_time - start_time;
+              }
+              if(trial_state == 'initial'){
+                trial_state = 'confidence';
+                updateInstructions();
+              } else {
+                endTrial();
+              }
             } else {
-              endTrial();
+              trial_data.bad_responses.push({
+                stage: trial_state,
+                response: Math.round(this.proportion*100)/100,
+                cutoff: trial.cutoffs[trial_state]
+              });
+              alert(trial.cutoffs[trial_state].message);
             }
+          }
+        };
+
+        this.checkResponse = function(){
+          // console.log(trial.cutoffs[trial_state])
+          if(trial.cutoffs[trial_state]){
+            // console.log('here')
+            var response_ok = true;
+            if(trial.cutoffs[trial_state].lower){
+              if(this.proportion < trial.cutoffs[trial_state].lower){
+                response_ok = false;
+              }
+            }
+            if(trial.cutoffs[trial_state].upper){
+              if(this.proportion > trial.cutoffs[trial_state].upper){
+                response_ok = false;
+              }
+            }
+            return response_ok;
+          } else {
+            return true;
           }
         };
 

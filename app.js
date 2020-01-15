@@ -22,7 +22,7 @@ const express = require('express'),
   {makeCode} = require('./helper/codeString.js');
 
 // --- INSTANTIATE THE APP
-const studyName = 'pilot';
+const studyName = 'test';
 const app = express();
 const PORT = process.env.PORT || 5000;
 app.use(

@@ -2,3 +2,7 @@
 #jspsych-content {
   width: 910px;
 }
+
+.jspsych-survey-multi-choice-text {
+  text-align: left !important;
+}

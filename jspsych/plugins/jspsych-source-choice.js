@@ -477,7 +477,7 @@ jsPsych.plugins['source-choice'] = (function(){
           }
         } else {
           this.y = 350;
-          this.labels = ['Very unsure', 'Very sure'];
+          this.labels = ['Low confidence', 'High confidence'];
         }
         // override the above defaults if given
 
