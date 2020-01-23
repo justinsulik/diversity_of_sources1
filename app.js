@@ -138,6 +138,10 @@ app.get('/finish', (req, res) => {
   res.render('finish.ejs', {completionCode: code});
 });
 
+app.get('/finish_demo', (req, res) => {
+  res.render('finish_demo.ejs');
+});
+
 // --- START THE SERVER
 var server = app.listen(PORT, function(){
     console.log("Listening on port %d", server.address().port);

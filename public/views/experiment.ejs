@@ -74,6 +74,14 @@
       cont_btn: 'consent'
     }
 
+    // instructions IF demo
+
+    var instructions_demo = {
+      type: 'instructions',
+      pages: ['This is a demonstration of an experiment studying social information use. No data will be recorded, and the consent form will thus be skipped.'],
+      show_clickable_nav: true,
+    }
+
     // english
 
     var english_instructions = {
@@ -495,7 +503,12 @@
 
     // timeline
 
-    timeline.push(consent);
+    if(trial_id == 'test'){
+      timeline.push(instructions_demo);
+    } else {
+      timeline.push(consent);
+    }
+
     timeline.push(english_instructions);
     timeline.push(english);
 
@@ -607,8 +620,12 @@
     }
 
     function finish(cmpltnCd){
-      cmpltnCd +=  trial_id;
-      window.location.href = "/finish?token="+cmpltnCd;
+      if(trial_id=='test'){
+        window.location.href = '/finish_demo'
+      } else {
+        window.location.href = "/finish?token="+cmpltnCd;
+      }
+
     }
 
     function makeCode(len){
