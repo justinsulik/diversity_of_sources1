@@ -103,6 +103,14 @@ app.get('/', (req, res, next) => {
 
 });
 
+app.get('/test', (req, res, next) => {
+
+    // Check browser not IE, and device not mobile
+    var trial_id = 'test';
+    let browserOk = true;
+    res.render('experiment.ejs', {input_data: JSON.stringify({trial_id: trial_id})});
+});
+
 // --- SAVE TRIAL DATA
 
 app.post('/data', (req, res, next) => {
