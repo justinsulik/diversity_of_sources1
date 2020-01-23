@@ -103,7 +103,7 @@ app.get('/', (req, res, next) => {
 
 });
 
-app.get('/test', (req, res, next) => {
+app.get('/demo', (req, res, next) => {
 
     // Check browser not IE, and device not mobile
     var trial_id = 'test';
