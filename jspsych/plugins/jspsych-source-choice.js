@@ -25,22 +25,35 @@ jsPsych.plugins['source-choice'] = (function(){
         default: 'likelihood',
         description: 'Options: "likelihood" or "morality"'
       },
-      agent_ids: {
-        type: jsPsych.plugins.parameterType.OBJECT,
-        default: [{gender: 'm', hair: 0}, {gender: 'm', hair: 1}, {gender: 'f', hair: 0}, {gender: 'f', hair: 1}, {gender: 'f', hair: 2}],
+      agents: {
+        type: jsPsych.plugins.parameterType.INT,
+        default: 5,
+        description: 'number of agents in each choice'
+      },
+      skin_colors: {
+        type: jsPsych.plugins.parameterType.COMPLEX,
         array: true,
-        description: 'IDs of agents'
+        description: 'array of rgb vals for skin tones'
       },
-      diversity: {
-        type: jsPsych.plugins.parameterType.STRING,
-        default: 'high',
-        description: 'If "high" then all TVs different; if "med" then one repeated 3 times; if "low" one repeated 4 times'
+      shirt_colors: {
+        type: jsPsych.plugins.parameterType.COMPLEX,
+        array: true,
+        description: 'array of rgb vals for skin tones'
       },
-      channel_ids: {
+      tv_background: {
         type: jsPsych.plugins.parameterType.INT,
         array: true,
-        default: [0, 1, 2, 3, 4],
-        description: 'Which channel IDs to use (shuffle in main expt script)'
+        description: 'RGB array for the color of the TV background'
+      },
+      tv_channels: {
+        type: jsPsych.plugins.parameterType.STRING,
+        array: true,
+        description: 'File name for TV anchors'
+      },
+      town_name: {
+        type: jsPsych.plugins.parameterType.STRING,
+        default: null,
+        description: 'Town name'
       },
       agreement: {
         type: jsPsych.plugins.parameterType.STRING,
